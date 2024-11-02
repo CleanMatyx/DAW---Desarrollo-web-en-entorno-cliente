@@ -5,7 +5,6 @@ class RestaurantService {
     constructor() {
         this._http = new Http();
         this.baseUrl = `${SERVER}${RESTAURANTS_ENDPOINT}`;
-        this.maxImageSize = 1024 * 1024; // 500KB máximo
     }
 
     async getAll() {
@@ -20,12 +19,6 @@ class RestaurantService {
 
     async post(restaurant) {
         try {
-            // Validar tamaño de imagen
-            const imageSize = this._calculateBase64Size(restaurant.image);
-            if (imageSize > this.maxImageSize) {
-                throw new Error(`La imagen es demasiado grande (${Math.round(imageSize/1024)}KB). Máximo permitido: ${this.maxImageSize/1024}KB`);
-            }
-
             const restaurantData = {
                 name: restaurant.title,
                 description: restaurant.description,
@@ -51,12 +44,6 @@ class RestaurantService {
             console.error('Error al eliminar restaurante:', error);
             throw error;
         }
-    }
-
-    _calculateBase64Size(base64String) {
-        const padding = base64String.endsWith('==') ? 2 : 
-                       base64String.endsWith('=') ? 1 : 0;
-        return (base64String.length * 3) / 4 - padding;
     }
 }
 

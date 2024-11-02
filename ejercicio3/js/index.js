@@ -7,23 +7,25 @@ const restaurantsService = new RestaurantService();
 async function init() {
     try {
         arrayGlobalRestaurantes = await restaurantsService.getAll();
-        showProducts(arrayGlobalRestaurantes);
+        showRestaurants(arrayGlobalRestaurantes);
         setupSearchListener();
     } catch (error) {
         console.error('Error al cargar restaurantes:', error);
     }
 }
 
+// Función para configurar el listener del input de búsqueda
 function setupSearchListener() {
     const searchInput = document.querySelector('#search');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const filtered = filterRestaurants(e.target.value);
-            showProducts(filtered);
+            showRestaurants(filtered);
         });
     }
 }
 
+// Función para filtrar restaurantes por nombre o descripción
 function filterRestaurants(searchTerm) {
     searchTerm = searchTerm.toLowerCase();
     return arrayGlobalRestaurantes.filter(restaurant => 
@@ -44,19 +46,15 @@ async function handleDelete(id, cardElement) {
         if (confirm('¿Está seguro de que desea eliminar este restaurante?')) {
             // Encontrar el restaurante antes de eliminarlo
             const restaurante = arrayGlobalRestaurantes.find(r => r.id === id);
-            console.log('Restaurante a eliminar:', restaurante);
 
             // Intentar eliminar
             await restaurantsService.delete(id);
-            console.log('Restaurante eliminado en el servidor');
 
             // Actualizar array global
             arrayGlobalRestaurantes = arrayGlobalRestaurantes.filter(r => r.id !== id);
-            console.log('Array global actualizado');
 
             // Eliminar del DOM
             cardElement.remove();
-            console.log('Elemento eliminado del DOM');
         }
     } catch (error) {
         console.error('Error en handleDelete:', error);
@@ -64,47 +62,91 @@ async function handleDelete(id, cardElement) {
     }
 }
 
-function showProducts(products) {
+// Función para mostrar productos actualizada
+function showRestaurants(restaurants) {
     const placesContainer = document.querySelector('#placesContainer');
     const template = document.querySelector('#restaurantTemplate');
     
+    // Limpiar contenedor
     placesContainer.textContent = '';
     
-    products.forEach(product => {
+    // Mapear días de la semana para mostrar
+    const daysMap = {
+        0: "Su",
+        1: "Mo",
+        2: "Tu",
+        3: "We",
+        4: "Th",
+        5: "Fr",
+        6: "Sa"
+    };
+
+    restaurants.forEach(restaurant => {
         try {
             const clone = template.content.cloneNode(true);
             const cardElement = clone.querySelector('.card');
             
-            // Obtener el botón delete existente
+            // Rellenar datos básicos
+            clone.querySelector('.card-title').textContent = restaurant.name;
+            clone.querySelector('.card-text').textContent = restaurant.description;
+            
+            // Rellenar días
+            const daysElement = clone.querySelector('.text-muted strong').parentElement;
+            if (restaurant.daysOpen) {
+                const dayNames = restaurant.daysOpen.map(day => daysMap[day]);
+                daysElement.textContent = `Días: ${dayNames.join(', ')}`;
+            } else {
+                daysElement.textContent = 'Días: No especificados';
+            }
+            
+            // Rellenar teléfono
+            const phoneElement = clone.querySelector('.phone');
+            phoneElement.textContent = `Teléfono: ${restaurant.phone || 'No disponible'}`;
+            
+            // Configurar badges
+            const openBadge = clone.querySelector('.badge.bg-success');
+            const closedBadge = clone.querySelector('.badge.bg-danger');
+            const isOpen = isRestaurantOpen(restaurant);
+            openBadge.style.display = isOpen ? 'inline-block' : 'none';
+            closedBadge.style.display = isOpen ? 'none' : 'inline-block';
+            
+            // Configurar imagen
+            if (restaurant.image) {
+                clone.querySelector('.card-img-top').src = restaurant.image;
+            }
+
+            // Configurar botón eliminar
             const deleteBtn = clone.querySelector('.delete');
             if (deleteBtn) {
-                deleteBtn.addEventListener('click', function(e) {
+                deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log('Click en botón delete');
-                    handleDelete(product.id, cardElement);
+                    handleDelete(restaurant.id, cardElement);
                 });
             }
 
-            // Imagen
-            const imgElement = clone.querySelector('.card-img-top');
-            if (imgElement && product.image) {
-                imgElement.src = product.image.startsWith('http') 
-                    ? product.image 
-                    : `data:image/jpeg;base64,${product.image}`;
-                imgElement.alt = product.name;
-            }
-
-            // Título y descripción
-            clone.querySelector('.card-title').textContent = product.name;
-            clone.querySelector('.card-text').textContent = product.description;
-
+            // Rellenar tipo de cocina
+            const footerElement = clone.querySelector('.card-footer .text-muted');
+            footerElement.textContent = `${restaurant.cuisine || 'No especificada'}`;
+            
+            // Agregar al DOM
             placesContainer.appendChild(clone);
-            console.log(product.name +' Tarjeta añadida al DOM');
         } catch (error) {
             console.error('Error al mostrar restaurante:', error);
         }
     });
+}
+
+function isRestaurantOpen(restaurant) {
+    // Validación inicial
+    if (!restaurant || !restaurant.daysOpen || !Array.isArray(restaurant.daysOpen)) {
+        return false;
+    }
+
+    const now = new Date();
+    const currentDay = now.getDay().toString(); // Convertir a string para comparar
+    
+    return restaurant.daysOpen.includes(currentDay);
 }
 
 // Iniciar la aplicación

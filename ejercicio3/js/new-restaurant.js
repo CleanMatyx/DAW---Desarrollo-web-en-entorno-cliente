@@ -4,7 +4,6 @@ import { RestaurantService } from './restaurant-service.class.js';
 
 const formRestaurant = document.getElementById("newRestaurant");
 const imgPreview = document.getElementById("imgPreview");
-const placesContainer = document.getElementById("placesContainer");
 const daysError = document.getElementById("daysError");
 const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
 const phoneRegex = /^\d{9}$/;
