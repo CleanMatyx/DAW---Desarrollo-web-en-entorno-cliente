@@ -16,7 +16,7 @@ async function init() {
 
 // Función para configurar el listener del input de búsqueda
 function setupSearchListener() {
-    const searchInput = document.querySelector('#search');
+    const searchInput = document.getElementById('search');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const filtered = filterRestaurants(e.target.value);
@@ -44,9 +44,6 @@ async function handleDelete(id, cardElement) {
         }
 
         if (confirm('¿Está seguro de que desea eliminar este restaurante?')) {
-            // Encontrar el restaurante antes de eliminarlo
-            const restaurante = arrayGlobalRestaurantes.find(r => r.id === id);
-
             // Intentar eliminar
             await restaurantsService.delete(id);
 
@@ -64,8 +61,8 @@ async function handleDelete(id, cardElement) {
 
 // Función para mostrar productos actualizada
 function showRestaurants(restaurants) {
-    const placesContainer = document.querySelector('#placesContainer');
-    const template = document.querySelector('#restaurantTemplate');
+    const placesContainer = document.getElementById('placesContainer');
+    const template = document.getElementById('restaurantTemplate');
     
     // Limpiar contenedor
     placesContainer.textContent = '';
