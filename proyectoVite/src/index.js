@@ -1,3 +1,0 @@
-navigator.geolocation.getCurrentPosition((coords) => {
-    
-})
