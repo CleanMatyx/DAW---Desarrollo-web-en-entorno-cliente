@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home | FoodScore</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="node_modules/bootstrap-icons/font/bootstrap-icons.css">
+  <script src="src/index.ts" type="module"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+  
+<body>
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">FoodScore</a>
+      <ul class="navbar-nav me-auto mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" href="index.html">Principal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="new-restaurant.html">Crear restaurante</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="profile.html">Mi perfil</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="logout">Salir</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+
+  <div class="container"> 
+    <nav class="navbar navbar-light bg-light mt-3">
+      <div class="d-flex mb-0 w-100 px-2">
+        <input class="form-control me-2" type="text" name="search" id="searchInput" placeholder="Search"
+          aria-label="Search">
+        <button type="button" class="btn btn-outline-primary border-0" id="searchBtn"><i class="bi bi-search"></i></button>
+      </div>
+    </nav>
+
+    <div class="text-muted" id="filterInfo">Filtrando por:</div>
+
+    <div id="placesContainer" class="mb-4 mt-2 row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+    </div>
+
+    <div class="mb-4"><button id="loadMore" class="btn btn-primary">Cargar más restaurantes</button></div>
+  </div>
+
+  <template id="restaurantTemplate">
+    <div class="col">
+      <div class="card h-100 shadow">
+        <a href=""><img class="card-img-top" src="" /></a>
+        <div class="card-body">
+          <!-- Quitar botón borrar si no es tuyo -->
+          <button class="btn btn-danger delete"><i class="bi bi-trash"></i></button>
+          <h4 class="card-title"><a href="">Nombre</a></h4>
+          <p class="card-text description">Descripción</p>
+          <div>
+            <small class="text-muted days">
+              <strong>Días: </strong>
+              <span class="days"></span>
+            </small>
+            <span class="badge ms-2 bg-success">Abierto</span>
+            <span class="badge ms-2 bg-danger">Cerrado</span>
+          </div>
+          <div>
+            <small class="text-muted phone">
+              <strong>Teléfono: </strong>
+              <span class="phone"></span>
+            </small>
+          </div>
+          <div>
+            <small class="text-muted stars">
+              <!-- Rellenar con ★ <i class="bi bi-star"></i> o ☆ <i class="bi bi-star-fill"></i> -->
+              <!-- Después poner el número con la puntuación. Ej: 3.46 -->
+            </small>
+          </div>
+        </div>
+        <div class="card-footer">
+          <small class="text-muted cuisine">cocina</small>
+          <small class="text-muted float-end distance">
+            distancia km
+          </small>
+        </div>
+      </div>
+    </div>
+  </template>
+</body>
+
+</html>
+

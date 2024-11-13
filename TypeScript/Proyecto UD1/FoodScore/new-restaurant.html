@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>New Restaurant | FoodScore</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="./node_modules/bootstrap-icons/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="node_modules/ol/ol.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="src/new-restaurant.ts" type="module"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">FoodScore</a>
+      <ul class="navbar-nav me-auto mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html">Principal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="new-restaurant.html">Crear restaurante</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="profile.html">Mi perfil</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="logout">Salir</a>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+
+  <div class="container">
+    <form action="#" class="mt-4" id="newRestaurant" novalidate>
+      <div class="mb-3">
+        <label for="name">Nombre</label>
+        <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
+        <div class="invalid-feedback">Nombre obligatorio (solo letras y espacios).</div>
+      </div>
+      <div class="mb-3">
+        <label for="description">Descripción</label>
+        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Description"></textarea>
+        <div class="invalid-feedback">Descripción obligatoria.</div>
+      </div>
+      <div class="mb-3">
+        <label for="cuisine">Cocina</label>
+        <input type="text" class="form-control" name="cuisine" id="cuisine" placeholder="Cuisine">
+        <div class="invalid-feedback">Tipo de cocina obligatoria.</div>
+      </div>
+      <p>Días de apertura</p>
+      <div class="mb-3">
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkMonday" name="days" value="1" checked>
+          <label class="custom-control-label" for="checkMonday">Lun</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkTuesday" name="days" value="2" checked>
+          <label class="custom-control-label" for="checkTuesday">Mar</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkWednesday" name="days" value="3" checked>
+          <label class="custom-control-label" for="checkWednesday">Mie</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkThursday" name="days" value="4" checked>
+          <label class="custom-control-label" for="checkThursday">Jue</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkFriday" name="days" value="5" checked>
+          <label class="custom-control-label" for="checkFriday">Vie</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkSaturday" name="days" value="6" checked>
+          <label class="custom-control-label" for="checkSaturday">Sab</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="custom-control-input" id="checkSunday" name="days" value="0" checked>
+          <label class="custom-control-label" for="checkSunday">Dom</label>
+        </div>
+        <div class="text-danger d-none" id="daysError"><small>Debes seleccionar al menos 1 día.</small></div>
+      </div>
+      <div class="mb-3">
+        <label for="phone">Teléfono</label>
+        <input type="number" class="form-control" id="phone" name="phone" placeholder="Phone number">
+        <div class="invalid-feedback">El teléfono debe tener 9 dígitos.</div>
+      </div>
+      <div class="mb-3">
+        <label for="image">Foto</label>
+        <input type="file" class="form-control" id="image" name="image">
+        <div class="invalid-feedback">La imagen es obligatoria.</div>
+      </div>
+      <img src="" alt="" id="imgPreview" class="img-thumbnail mb-3 d-none">
+      <div id="autocomplete" class="autocomplete-container"></div>
+      <div id="map" class="mb-3"></div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Create</button>
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>
