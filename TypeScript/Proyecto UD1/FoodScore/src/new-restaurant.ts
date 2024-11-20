@@ -1,24 +1,30 @@
-import { RestaurantService } from './restaurant-service.class.js';
+import { RestaurantService } from './classes/restaurant-service.ts';
+import { FormElements } from './interfaces/formElements.ts';
+import { Restaurant } from './interfaces/restaurant.ts';
+import { FORM_RESTAURANT, IMG_PREVIEW, DAYS_ERROR, NAME_REGEX, PHONE_REGE, WITHOUT_SPACE_REGEX } from './constants.ts';
 
-"use strict";
-
-const formRestaurant = document.getElementById("newRestaurant");
-const imgPreview = document.getElementById("imgPreview");
-const daysError = document.getElementById("daysError");
-const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
-const phoneRegex = /^\d{9}$/;
-const withoutSpaceRegex = /^[A-Za-z][A-Za-z\s]+$/;
 const restaurantService = new RestaurantService();
 
-function validateForm(form, name, nameRegex, description, cuisine, days, daysError, phone, phoneRegex, image) {
+function validateForm(
+    form: FormElements, 
+    name: string, 
+    nameRegex: RegExp, 
+    description: string, 
+    cuisine: string, 
+    days: string[], 
+    daysError: HTMLElement, 
+    phone: string, 
+    phoneRegex: RegExp, 
+    image: File | null
+): boolean {
     let isValid = true;
 
     // Validar nombre
     if (!name || !nameRegex.test(name)) {
-        form.name.classList.add('is-invalid');
+        form.restaurantName.classList.add('is-invalid');
         isValid = false;
     } else {
-        form.name.classList.remove('is-invalid');
+        form.restaurantName.classList.remove('is-invalid');
     }
 
     // Validar descripción
@@ -30,7 +36,7 @@ function validateForm(form, name, nameRegex, description, cuisine, days, daysErr
     }
 
     // Validar cocina
-    if (!cuisine || !withoutSpaceRegex.test(cuisine)) {
+    if (!cuisine || !WITHOUT_SPACE_REGEX.test(cuisine)) {
         form.cuisine.classList.add('is-invalid');
         isValid = false;
     } else {
@@ -39,10 +45,10 @@ function validateForm(form, name, nameRegex, description, cuisine, days, daysErr
 
     // Validar días
     if (days.length === 0) {
-        daysError.style.display = 'block';
+        daysError.classList.remove('d-none');
         isValid = false;
     } else {
-        daysError.style.display = 'none';
+        daysError.classList.add('d-none');
     }
 
     // Validar teléfono
@@ -64,37 +70,43 @@ function validateForm(form, name, nameRegex, description, cuisine, days, daysErr
     return isValid;
 }
 
-formRestaurant.addEventListener('submit', async (e) => {
+// Evento submit del formulario
+if (FORM_RESTAURANT) {
+    FORM_RESTAURANT.addEventListener('submit', async (e: Event) => {
     e.preventDefault();
     
-    const name = formRestaurant.name.value.trim();
-    const description = formRestaurant.description.value.trim();
-    const cuisine = formRestaurant.cuisine.value.trim();
-    const days = Array.from(formRestaurant.days)
+    const form = FORM_RESTAURANT as FormElements;
+    const name = form.restaurantName.value.trim();
+    const description = form.description.value.trim();
+    const cuisine = form.cuisine.value.trim();
+    const days = Array.from(form.days)
         .filter((i) => i.checked)
         .map(day => day.value);
-    const phone = formRestaurant.phone.value.trim();
-    const image = formRestaurant.image.files[0];
+    const phone = form.phone.value.trim();
+    const image = form.image.files ? form.image.files[0] : null;
 
-    if (validateForm(formRestaurant, name, nameRegex, description, cuisine, days, daysError, phone, phoneRegex, image)) {
+    if (DAYS_ERROR && validateForm(form, name, NAME_REGEX, description, cuisine, days, DAYS_ERROR, phone, PHONE_REGE, image)) {
         try {
             // Convertir imagen a base64
-            const base64Image = await new Promise((resolve, reject) => {
+            const base64Image = await new Promise<string>((resolve, reject) => {
                 if (!image) {
                     reject(new Error('No se ha seleccionado ninguna imagen'));
                 }
                 
                 const reader = new FileReader();
-                reader.readAsDataURL(image);
+                if (image) {
+                    reader.readAsDataURL(image);
+                } else {
+                    reject(new Error('No se ha seleccionado ninguna imagen'));
+                }
                 reader.onload = () => {
                     // Extraer solo la parte base64 sin el prefijo data:image/*;base64,
-                    const base64String = reader.result.split(',')[1];
+                    const base64String = (reader.result as string).split(',')[1];
                     resolve(base64String);
                 };
-                reader.onerror = error => reject(new Error(`Error al leer la imagen: ${error.message}`));
             });
-
-            const restaurant = {
+            
+            const restaurant: Restaurant = {
                 title: name,
                 description,
                 cuisine,
@@ -107,17 +119,18 @@ formRestaurant.addEventListener('submit', async (e) => {
             location.assign('index.html');
         } catch (error) {
             console.error('Error al crear restaurante:', error);
-            alert(error.message || 'Error al crear el restaurante');
+            alert((error as Error).message || 'Error al crear el restaurante');
         }
     }
 });
 
-formRestaurant.image.addEventListener('change', event => {
-    let file = event.target.files[0];
-    let reader = new FileReader();
+FORM_RESTAURANT.image.addEventListener('change', (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files[0];
+    const reader = new FileReader();
     if (file) reader.readAsDataURL(file);
-    reader.addEventListener('load', e => {
-        imgPreview.src = reader.result;
-        imgPreview.classList.remove("d-none");
+    reader.addEventListener('load', () => {
+        IMG_PREVIEW!.src = reader.result as string;
+        IMG_PREVIEW!.classList.remove("d-none");
     });
 });
