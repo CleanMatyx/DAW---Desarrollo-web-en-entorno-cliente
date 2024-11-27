@@ -1,6 +1,6 @@
 //export const SERVER = 'https://api.fullstackpro.es/foodscore';
 // export const SERVER = 'http://localhost:3000';
-export const SERVER = 'https://api.fullstackpro.es/foodscore-lite';
+export const SERVER = 'https://api.fullstackpro.es/foodscore';
 export const RESTAURANTS_ENDPOINT = '/restaurants';
 export const USER_LOGIN_ENDPOINT = '/auth/login';
 export const USER_REGISTER_ENDPOINT = '/auth/register';
