@@ -1,10 +1,9 @@
-
-
-export interface FormElements extends HTMLFormElement {
+export interface FormElements {
     restaurantName: HTMLInputElement;
     description: HTMLInputElement;
     cuisine: HTMLInputElement;
-    days: NodeListOf<HTMLInputElement>;
     phone: HTMLInputElement;
     image: HTMLInputElement;
+    daysError: HTMLElement;
+    days: NodeListOf<HTMLInputElement>;
 }

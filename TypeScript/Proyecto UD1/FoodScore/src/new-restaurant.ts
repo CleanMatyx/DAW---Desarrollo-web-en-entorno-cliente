@@ -1,9 +1,10 @@
 import { RestaurantService } from './classes/restaurant-service.ts';
 import { FormElements } from './interfaces/formElements.ts';
-import { Restaurant } from './interfaces/restaurant.ts';
-import { FORM_RESTAURANT, IMG_PREVIEW, DAYS_ERROR, NAME_REGEX, PHONE_REGE, WITHOUT_SPACE_REGEX } from './constants.ts';
+import { RestaurantInsert } from './interfaces/restaurant.ts';
+import { FORM_RESTAURANT, IMG_PREVIEW, DAYS_ERROR, NAME_REGEX, PHONE_REGEX, WITHOUT_SPACE_REGEX } from './constants.ts';
 
 const restaurantService = new RestaurantService();
+const formRestaurant = document.getElementById("newRestaurant");
 
 function validateForm(
     form: FormElements, 
@@ -71,11 +72,11 @@ function validateForm(
 }
 
 // Evento submit del formulario
-if (FORM_RESTAURANT) {
-    FORM_RESTAURANT.addEventListener('submit', async (e: Event) => {
+if (formRestaurant) {
+    formRestaurant.addEventListener('submit', async (e: Event) => {
     e.preventDefault();
     
-    const form = FORM_RESTAURANT as FormElements;
+    const form = FORM_RESTAURANT as unknown as FormElements;
     const name = form.restaurantName.value.trim();
     const description = form.description.value.trim();
     const cuisine = form.cuisine.value.trim();
@@ -85,7 +86,7 @@ if (FORM_RESTAURANT) {
     const phone = form.phone.value.trim();
     const image = form.image.files ? form.image.files[0] : null;
 
-    if (DAYS_ERROR && validateForm(form, name, NAME_REGEX, description, cuisine, days, DAYS_ERROR, phone, PHONE_REGE, image)) {
+    if (DAYS_ERROR && validateForm(form, name, NAME_REGEX, description, cuisine, days, DAYS_ERROR, phone, PHONE_REGEX, image)) {
         try {
             // Convertir imagen a base64
             const base64Image = await new Promise<string>((resolve, reject) => {
@@ -106,13 +107,16 @@ if (FORM_RESTAURANT) {
                 };
             });
             
-            const restaurant: Restaurant = {
-                title: name,
-                description,
-                cuisine,
-                days,
-                phone,
-                image: base64Image
+            const restaurant: RestaurantInsert = {
+                name: name,
+                description: description,
+                cuisine: cuisine,
+                daysOpen: days,
+                image: base64Image,
+                phone: phone,
+                address: '',
+                lat: 0,
+                lng: 0
             };
 
             await restaurantService.post(restaurant);
@@ -123,14 +127,21 @@ if (FORM_RESTAURANT) {
         }
     }
 });
-
-FORM_RESTAURANT.image.addEventListener('change', (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    const file = input.files[0];
-    const reader = new FileReader();
-    if (file) reader.readAsDataURL(file);
-    reader.addEventListener('load', () => {
-        IMG_PREVIEW!.src = reader.result as string;
-        IMG_PREVIEW!.classList.remove("d-none");
+if(FORM_RESTAURANT) {
+    (FORM_RESTAURANT as unknown as FormElements).image.addEventListener('change', (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        const file = input.files ? input.files[0] : null;
+        const reader = new FileReader();
+    
+        if (file) {
+            reader.readAsDataURL(file);
+            reader.addEventListener('load', () => {
+                if (IMG_PREVIEW) {
+                    (IMG_PREVIEW as HTMLImageElement).src = reader.result as string;
+                    IMG_PREVIEW.classList.remove("d-none");
+                }
+            });
+        }
     });
-});
+    }
+}
