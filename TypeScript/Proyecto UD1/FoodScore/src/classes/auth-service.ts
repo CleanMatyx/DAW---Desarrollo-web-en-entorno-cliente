@@ -1,6 +1,6 @@
 import { SERVER, USER_LOGIN_ENDPOINT, USER_REGISTER_ENDPOINT} from '../constants';
 import { Http } from './http';
-import { UserLogin, User } from '../interfaces/user';
+import { UserLogin, User, TokenResponse } from '../interfaces/user';
 
 
 export class AuthService {
@@ -32,5 +32,14 @@ export class AuthService {
         console.log("auth-service: Logout");
         localStorage.removeItem("token");
         location.reload();
+    }
+
+    async checkToken() : Promise<void>{
+        try {
+            await this._http.get<void>(`${SERVER}/auth/validate`);
+        } catch (error) {
+            console.log("No hay token o esta caducado" , error);
+            location.assign("login.html");
+        }
     }
 }

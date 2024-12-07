@@ -1,60 +1,110 @@
-import "../styles.css";
+
 import { AuthService } from "./classes/auth-service";
 import { MapService } from "./classes/map-service";
 import { UserService } from "./classes/user-service";
+import { Coordinates } from "./interfaces/coordinates";
 import { User } from "./interfaces/user";
 
-if (!localStorage.getItem("token")) {
-    location.assign("login.html");
-}
-
-const logoutButton = document.querySelector("#logout");
-if (logoutButton) {
-    logoutButton.addEventListener("click", function() {
-        const authService = new AuthService;
-        authService.logout();
-    });
-}
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id") as unknown as number;
-
+const authService = new AuthService();
 const userService = new UserService();
-let user: User;
+const id : number =parseInt(location.search.split("=")[1]);
 
-async function getUser(): Promise<void> {
-    if (id) {
-        user = await userService.getProfile(id) as User;
-        
-    }else{
-        user = await userService.getMyProfile() as User;
+function mostrarMapa(user : User){
+    const coordenadas  = [user.lat ,user.lng];
 
-    }
-    showUserProfil(user);
+    const [latitude , longitude] = coordenadas;
+    const coords : Coordinates = {latitude , longitude};
+    
+    const mapa = new MapService( coords ,"map");
+    mapa.createMarker(coords);
 }
 
-const container = <HTMLDivElement>document.getElementById("profile");
+const user = await userService.getProfile(id);
 
-function showUserProfil(user: User): void {
-    container.replaceChildren(userService.userToHTML(user));
+(document.querySelector("#avatar") as HTMLImageElement).src = user.avatar;
+(document.querySelector("#name") as HTMLElement).textContent = user.name;
+(document.querySelector("#email") as HTMLElement).textContent = user.email;
+
+mostrarMapa(user);
+
+if(user.me === false){
+    document.querySelector("#editProfile")?.classList.add("d-none");
+    document.querySelector("#editPassword")?.classList.add("d-none");
+    document.querySelector("label.btn.btn-sm")?.classList.add("d-none");
 }
 
-getUser().then(()=>{
-    showMap();
+document.querySelector("#photoInput")?.addEventListener("change" , (event : Event) => {
+    const file = (event.target as HTMLInputElement).files![0];
+    const reader = new FileReader();
+    if (file) reader.readAsDataURL(file);
+    reader.addEventListener('load', () => {
+        userService.savePhoto(reader.result as string).then(image => {
+            (document.querySelector("#avatar") as HTMLImageElement).src = image;            
+        })
+    });
 });
 
+(document.querySelector("#editProfile") as HTMLElement).addEventListener("click" , () => {
+    (document.querySelector("#profileInfo") as HTMLElement).classList.add("d-none");
+    (document.querySelector("#profileForm") as HTMLElement).classList.remove("d-none");
+    (document.querySelector("#emailInput") as HTMLInputElement).value = user.email;
+    (document.querySelector("#nameInput") as HTMLInputElement).value = user.name;
+});
 
-async function showMap(): Promise<void> {
-    const coords:
-        {
-            latitude: number,
-            longitude: number
-        } = {
-            latitude: user.lat,
-            longitude: user.lng
-        };
-    const mapService = MapService.createMapService(coords, "map");
-    mapService.createMarker(coords, "red");
+document.querySelector("#cancelEditProfile")?.addEventListener("click", () => {
+    (document.querySelector("#profileInfo") as HTMLElement).classList.remove("d-none");
+    (document.querySelector("#profileForm") as HTMLElement).classList.add("d-none");
+});
 
-    const mapView = mapService.getMapView();
-}
+(document.querySelector("form") as HTMLFormElement).addEventListener("submit" , e =>{
+
+    e.preventDefault();
+
+    const email = (document.querySelector("#emailInput") as HTMLInputElement).value;
+    const name = (document.querySelector("#nameInput") as HTMLInputElement).value;
+
+    userService.saveProfile(name , email).then(() => {
+        (document.querySelector("#profileInfo") as HTMLElement).classList.remove("d-none");
+        (document.querySelector("#profileForm") as HTMLElement).classList.add("d-none");
+        (document.querySelector("#name") as HTMLElement).textContent = name;
+        (document.querySelector("#email") as HTMLElement).textContent = email;
+    });    
+});
+
+(document.querySelector("#editPassword") as HTMLElement).addEventListener("click" , () => {
+    (document.querySelector("#profileInfo") as HTMLElement).classList.add("d-none");
+    (document.querySelector("#passwordForm") as HTMLElement).classList.remove("d-none");
+    
+});
+
+(document.querySelector("#cancelEditPassword") as HTMLElement).addEventListener("click" , () => {
+    (document.querySelector("#profileInfo") as HTMLElement).classList.remove("d-none");
+    (document.querySelector("#passwordForm") as HTMLElement).classList.add("d-none");
+});
+
+const divFormPasswd = document.querySelector("#passwordForm") as HTMLElement;
+
+(divFormPasswd.firstElementChild as HTMLFormElement).addEventListener("submit" , e => {
+
+    e.preventDefault();
+
+    const passw = (document.querySelector("#password") as HTMLInputElement).value;
+    const passw2 = (document.querySelector("#password2") as HTMLInputElement).value;
+
+    if(passw === passw2){
+        userService.savePassword(passw).then(() => {
+            (document.querySelector("#profileInfo") as HTMLElement).classList.remove("d-none");
+            (document.querySelector("#passwordForm") as HTMLElement).classList.add("d-none");
+        }).catch(() => {
+            confirm("Error al actualizar las contraseñas")
+        })
+    }else{
+        confirm("Error las contraseñas no son iguales");
+    }
+})
+
+
+document.querySelector("#logout")?.addEventListener("click" , () => {
+    authService.logout();
+});
+

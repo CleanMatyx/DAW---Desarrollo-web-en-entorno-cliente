@@ -12,7 +12,7 @@ import { Point } from "ol/geom";
 
 //Constants
 import { FORM_RESTAURANT, IMG_PREVIEW } from './constants.ts';
-import { Utils } from "./classes/user-service.ts";
+import { Utils } from "./classes/utils-service.ts";
 
 
 //If user is not logged, redirect to login page
