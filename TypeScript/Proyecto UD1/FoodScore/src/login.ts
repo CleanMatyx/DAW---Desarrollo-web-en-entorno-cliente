@@ -16,24 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const coords: Coordinates = await MyGeolocation.getLocation();
       const response = await fetch(`${SERVER}${USER_LOGIN_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        lat: coords.latitude,
-        lng: coords.longitude,
-      }),
-    });
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          lat: coords.latitude,
+          lng: coords.longitude,
+        }),
+      });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData: { error: string } = await response.json();
         throw new Error(errorData.error || 'Login failed');
       }
 
-      const data = await response.json();
+      const data: { accessToken: string } = await response.json();
       localStorage.setItem('token', data.accessToken);
       window.location.href = 'index.html';
     } catch (error) {

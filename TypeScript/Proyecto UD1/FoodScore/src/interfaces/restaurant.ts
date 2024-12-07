@@ -13,10 +13,10 @@ export interface RestaurantInsert {
 }
 
 export interface Restaurant extends RestaurantInsert {
-    id: number;
-    creator: User;
-    mine: boolean;
-    distance: number;
-    commented: boolean;
-    stars: number;
+    id?: number;
+    creator?: User;
+    mine?: boolean;
+    distance?: number;
+    commented?: boolean;
+    stars?: number;
 }

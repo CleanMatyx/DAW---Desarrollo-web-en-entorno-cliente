@@ -4,6 +4,11 @@ import { Restaurant } from './interfaces/restaurant.ts';
 let arrayGlobalRestaurantes: Restaurant[] = [];
 const restaurantsService = new RestaurantService();
 
+if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+  }
+
+  
 // Cargar restaurantes al iniciar
 async function init() {
     try {

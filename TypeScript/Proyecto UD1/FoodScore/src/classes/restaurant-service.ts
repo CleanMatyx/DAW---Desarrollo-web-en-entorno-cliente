@@ -1,117 +1,115 @@
-import { RESTAURANTS_ENDPOINT, SERVER } from "../constants.js";
-import { Http } from "./http.js";
-import { RestaurantInsert, Restaurant } from "../interfaces/restaurant.js";
-import { Comment } from "../interfaces/comment.js";
+
+//Classes imports
+import { Http } from "./http";
+import { Utils } from "./user-service";
+
+//Interfaces imports
+import { Restaurant } from "../interfaces/restaurant";
+import { Comment } from "../interfaces/comment";
+import { RestaurantsResponse, SingleRestaurantResponse, SingleCommentResponse, CommentsResponse } from "../interfaces/responses";
+
+//Constants imports
+import restaurantTemplate from "../handlebars/restaurant.hbs";
+import commentTemplate from "../handlebars/comment.hbs";
+import { SERVER, RESTAURANTS_ENDPOINT } from "../constants";
+
+import Swal from "sweetalert2";
+
+const utils = new Utils();
 
 export class RestaurantService {
-    private _http: Http;
-    private baseUrl: string;
-
-    constructor() {
-        this._http = new Http();
-        this.baseUrl = `${SERVER}${RESTAURANTS_ENDPOINT}`;
-    }
+    constructor(private dbConnection: Http = new Http()) { }
 
     async getAll(): Promise<Restaurant[]> {
-        try{
-            const response: { restaurants?: Restaurant[] } = await this._http.get(this.baseUrl);
-            return response.restaurants || [];
-        } catch (error) {
-            console.log('Error al obtener restaurantes: ', error);
-            return [];
-        }
+        console.log("rest-service: Getting All");
+        const resp = this.dbConnection.get<RestaurantsResponse>(SERVER + RESTAURANTS_ENDPOINT);
+        return (await resp).restaurants;
     }
 
     async get(id: number): Promise<Restaurant> {
-        try {
-            const response: { restaurant: Restaurant } = await this._http.get(`${this.baseUrl}/${id}`);
-            return response.restaurant;
-        } catch (error) {
-            console.error('Error al obtener restaurante:', error);
-            throw error;
-        }
+        console.log("rest-service: Getting " + id);
+        const resp = this.dbConnection.get<SingleRestaurantResponse>(SERVER + RESTAURANTS_ENDPOINT + "/" + id);
+        return (await resp).restaurant;
     }
 
-    async post(restaurant: RestaurantInsert): Promise<Restaurant> {
-        try {
-            const restaurantData = {
-                name: restaurant.name,
-                description: restaurant.description,
-                daysOpen: restaurant.daysOpen,
-                phone: restaurant.phone,
-                cuisine: restaurant.cuisine,
-                image: restaurant.image,
-                address: restaurant.address,
-                lat: restaurant.lat,
-                lng: restaurant.lng
-            };
-
-            const response: { restaurant: Restaurant } = await this._http.post(this.baseUrl, restaurantData);
-            return response.restaurant;
-        } catch (error) {
-            console.error('Error al crear restaurante:', error);
-            throw error;
-        }
+    async post(restaurant: Restaurant): Promise<Restaurant> {
+        console.log("rest-service: Posting restaurant:");
+        console.log(restaurant);
+        const resp = await this.dbConnection.post<SingleRestaurantResponse, Restaurant>(SERVER + RESTAURANTS_ENDPOINT, restaurant);
+        return resp.restaurant;
     }
 
     async delete(id: number): Promise<void> {
-        try {
-            await this._http.delete(`${this.baseUrl}/${id}`);
-        } catch (error) {
-            console.error('Error al eliminar restaurante:', error);
-            throw error;
-        }
+        console.log("rest-service: Deleting: " + id);
+        return this.dbConnection.delete(SERVER + RESTAURANTS_ENDPOINT + "/" + id);
     }
 
     async getComments(restaurantId: number): Promise<Comment[]> {
-        try {
-            const response: { comments: Comment[] } = await this._http.get(`${this.baseUrl}/${restaurantId}/comments`);
-            return response.comments || [];
-        } catch (error) {
-            console.error('Error al obtener comentarios:', error);
-            return [];
-        }
+        console.log("rest-service: getComments " + restaurantId);
+        const resp = this.dbConnection.get<CommentsResponse>(SERVER + RESTAURANTS_ENDPOINT + "/" + restaurantId + "/comments");
+        return (await resp).comments;
     }
 
-    async addComment(restaurantId:number, comment: Comment): Promise<Comment> {
-        try {
-            const response: { comment: Comment } = await this._http.post(`${this.baseUrl}/${restaurantId}/comments`, comment);
-            return response.comment;
-        } catch (error) {
-            console.error('Error al agregar comentario:', error);
-            throw error;
-        }
+    async addComment(restaurantId: number, comment: Comment): Promise<Comment> {
+        console.log("rest-service: AddComment on: " + restaurantId);
+        console.log(comment);
+        const resp = this.dbConnection.post<SingleCommentResponse, Comment>(SERVER + RESTAURANTS_ENDPOINT + "/" + restaurantId + "/comments", comment);
+        return (await resp).comment;
     }
 
-    toHTML(
-        restaurant: Restaurant,
-        restTemplate: HTMLTemplateElement,
-        fBorrar: () => void,
-    ): HTMLDivElement {
-        const clone = document.importNode(restTemplate.content, true);
-        
-        const div = clone.querySelector('div');
-        if (div) {
-            const nameElement = div.querySelector('.restaurant-name');
-            const addressElement = div.querySelector('.restaurant-address');
-            const deleteButton = div.querySelector('.delete-button');
-    
-            if (nameElement) {
-                nameElement.textContent = restaurant.name;
-            }
-    
-            if (addressElement) {
-                addressElement.textContent = restaurant.address;
-            }
-    
-            if (deleteButton) {
-                deleteButton.addEventListener('click', fBorrar);
-            }
+    public comment2HTML(comment: Comment): string | Node {
+        console.log(comment);
+
+        const col: HTMLDivElement = document.createElement("div");
+        col.classList.add("col");
+
+        const commentHTML = commentTemplate({
+            ...comment,
+            fullStars: utils.getFullStars(comment),
+            emptyStars: utils.getEmptyStars(comment),
+        });
+
+        col.innerHTML = commentHTML;
+        return col;
+    }
+
+    public restaurant2HTML(restaurant: Restaurant): string | Node {
+        console.log(restaurant);
+
+        const col: HTMLDivElement = document.createElement("div");
+        col.classList.add("col");
+
+        const restHTML = restaurantTemplate({
+            ...restaurant,
+            open: utils.isOpen(restaurant),
+            days: utils.getDaysStr(restaurant),
+            fullStars: utils.getFullStars(restaurant),
+            emptyStars: utils.getEmptyStars(restaurant),
+            distance: utils.getDistanceFormated(restaurant),
+        });
+
+        col.innerHTML = restHTML;
+
+        if (restaurant.mine) {
+            col.querySelector("button")!.addEventListener("click", async () => {
+                if (confirm("¿Are you sure you want to delete this restaurant?")) {
+                    try {
+                        if (restaurant.id !== undefined) {
+                            await this.delete(restaurant.id);
+                        }
+                        location.assign("index.html");
+                    } catch (e) {
+                        Swal.fire({
+                            title: "Error ocurred",
+                            text: "Error deleting restaurant!",
+                            icon: "error"
+                        });
+                        console.error(e);
+                    }
+                }
+            });
         }
-    
-        const container = document.createElement('div');
-        container.appendChild(clone);
-    
-        return container;
+
+        return col;
     }
 }

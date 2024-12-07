@@ -1,12 +1,14 @@
 //export const SERVER = 'https://api.fullstackpro.es/foodscore';
 // export const SERVER = 'http://localhost:3000';
-export const SERVER = 'https://api.fullstackpro.es/foodscore-lite';
+export const SERVER = 'https://api.fullstackpro.es/foodscore';
 export const RESTAURANTS_ENDPOINT = '/restaurants';
 export const USER_LOGIN_ENDPOINT = '/auth/login';
 export const USER_REGISTER_ENDPOINT = '/auth/register';
-export const FORM_RESTAURANT = document.getElementById("newRestaurant");
-export const IMG_PREVIEW = document.getElementById("imgPreview");
+export const FORM_RESTAURANT = document.getElementById('newRestaurant') as HTMLFormElement;
+export const IMG_PREVIEW = document.getElementById("imgPreview") as HTMLImageElement;
 export const DAYS_ERROR = document.getElementById("daysError");
 export const NAME_REGEX = /^[A-Za-z][A-Za-z\s]*$/;
 export const PHONE_REGEX = /^\d{9}$/;
 export const WITHOUT_SPACE_REGEX = /^[A-Za-z][A-Za-z\s]+$/;
+export const WEEKDAYS  = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+export const DIAS_SEMANA =["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];

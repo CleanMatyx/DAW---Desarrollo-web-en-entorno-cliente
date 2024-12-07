@@ -1,147 +1,101 @@
+"use strict";
+
+//Classes imports
 import { RestaurantService } from './classes/restaurant-service.ts';
-import { FormElements } from './interfaces/formElements.ts';
 import { RestaurantInsert } from './interfaces/restaurant.ts';
-import { FORM_RESTAURANT, IMG_PREVIEW, DAYS_ERROR, NAME_REGEX, PHONE_REGEX, WITHOUT_SPACE_REGEX } from './constants.ts';
 
-const restaurantService = new RestaurantService();
-const formRestaurant = document.getElementById("newRestaurant");
+//Map imports
+import { MapService } from './classes/map-service.ts';
+import { MyGeolocation } from './classes/my-geolocation.ts';
+import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete";
+import { Point } from "ol/geom";
 
-function validateForm(
-    form: FormElements, 
-    name: string, 
-    nameRegex: RegExp, 
-    description: string, 
-    cuisine: string, 
-    days: string[], 
-    daysError: HTMLElement, 
-    phone: string, 
-    phoneRegex: RegExp, 
-    image: File | null
-): boolean {
-    let isValid = true;
+//Constants
+import { FORM_RESTAURANT, IMG_PREVIEW } from './constants.ts';
+import { Utils } from "./classes/user-service.ts";
 
-    // Validar nombre
-    if (!name || !nameRegex.test(name)) {
-        form.restaurantName.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.restaurantName.classList.remove('is-invalid');
-    }
 
-    // Validar descripción
-    if (!description || description.length < 10) {
-        form.description.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.description.classList.remove('is-invalid');
-    }
-
-    // Validar cocina
-    if (!cuisine || !WITHOUT_SPACE_REGEX.test(cuisine)) {
-        form.cuisine.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.cuisine.classList.remove('is-invalid');
-    }
-
-    // Validar días
-    if (days.length === 0) {
-        daysError.classList.remove('d-none');
-        isValid = false;
-    } else {
-        daysError.classList.add('d-none');
-    }
-
-    // Validar teléfono
-    if (!phone || !phoneRegex.test(phone)) {
-        form.phone.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.phone.classList.remove('is-invalid');
-    }
-
-    // Validar imagen
-    if (!image) {
-        form.image.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.image.classList.remove('is-invalid');
-    }
-
-    return isValid;
+//If user is not logged, redirect to login page
+if (!localStorage.getItem("token")) {
+    location.assign("login.html");
 }
+//Restaurant form
+const form = FORM_RESTAURANT;
 
-// Evento submit del formulario
-if (formRestaurant) {
-    formRestaurant.addEventListener('submit', async (e: Event) => {
-    e.preventDefault();
+// const restaurantService = new RestaurantService();
+
+// Add event listener to the form to handle the image preview
+const imgPreview = IMG_PREVIEW;
+Utils.imagePreview(form.image as HTMLInputElement);
+
+//Map service
+let latitude: number;
+let longitude: number;
+
+async function showMap(): Promise<void> {
+    //Assing the current location to the map
+    const currentUserLocation = await MyGeolocation.getLocation();
+    const mapService = new MapService(currentUserLocation, "map");
+    const marker = mapService.createMarker(currentUserLocation);
+    const autocomplete = new GeocoderAutocomplete(document.querySelector("#autocomplete")!,
+        "2fffc31efada4e81b10675e9a7e5d5bc", { lang: "es", debounceDelay: 600 });
+
+        latitude = currentUserLocation.latitude;
+        longitude = currentUserLocation.longitude;
     
-    const form = FORM_RESTAURANT as unknown as FormElements;
-    const name = form.restaurantName.value.trim();
-    const description = form.description.value.trim();
-    const cuisine = form.cuisine.value.trim();
-    const days = Array.from(form.days)
-        .filter((i) => i.checked)
-        .map(day => day.value);
-    const phone = form.phone.value.trim();
-    const image = form.image.files ? form.image.files[0] : null;
+        const mapView = mapService.view;
+    
+        autocomplete.on("select", (location) => {
+            [latitude, longitude] = location.geometry.coordinates;
+            marker.setGeometry(new Point([latitude, longitude]));
+            mapView.setCenter([latitude, longitude]);
+        });
+    }
+    
+    showMap().then(() => {
+        const restaurantService = new RestaurantService();
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+    
+            //Check
+            const checkedDays = Array.from(form.days as NodeListOf<HTMLInputElement>)
+                .filter((input: HTMLInputElement) => input.checked)
+                .map((input: HTMLInputElement) => input.value + "");
 
-    if (DAYS_ERROR && validateForm(form, name, NAME_REGEX, description, cuisine, days, DAYS_ERROR, phone, PHONE_REGEX, image)) {
-        try {
-            // Convertir imagen a base64
-            const base64Image = await new Promise<string>((resolve, reject) => {
-                if (!image) {
-                    reject(new Error('No se ha seleccionado ninguna imagen'));
-                }
-                
-                const reader = new FileReader();
-                if (image) {
-                    reader.readAsDataURL(image);
-                } else {
-                    reject(new Error('No se ha seleccionado ninguna imagen'));
-                }
-                reader.onload = () => {
-                    // Extraer solo la parte base64 sin el prefijo data:image/*;base64,
-                    const base64String = (reader.result as string).split(',')[1];
-                    resolve(base64String);
-                };
-            });
-            
-            const restaurant: RestaurantInsert = {
-                name: name,
-                description: description,
-                cuisine: cuisine,
-                daysOpen: days,
-                image: base64Image,
-                phone: phone,
-                address: '',
-                lat: 0,
-                lng: 0
+            const address = (document.querySelector(".geoapify-autocomplete-input") as HTMLInputElement).value;
+
+            //Check fields
+            const formValideFields = new Utils;
+            const validations: { [key: string]: boolean } = {
+                "name": formValideFields.validateName(form),
+                "description": formValideFields.validateDescription(form),
+                "phone": formValideFields.validatePhone(form),
+                "cuisine": formValideFields.validateCuisine(form),
+                "days" : formValideFields.validateDays(checkedDays),
+                "image": formValideFields.validateImage(form)
             };
 
-            await restaurantService.post(restaurant);
-            location.assign('index.html');
-        } catch (error) {
-            console.error('Error al crear restaurante:', error);
-            alert((error as Error).message || 'Error al crear el restaurante');
-        }
-    }
-});
-if(FORM_RESTAURANT) {
-    (FORM_RESTAURANT as unknown as FormElements).image.addEventListener('change', (event: Event) => {
-        const input = event.target as HTMLInputElement;
-        const file = input.files ? input.files[0] : null;
-        const reader = new FileReader();
-    
-        if (file) {
-            reader.readAsDataURL(file);
-            reader.addEventListener('load', () => {
-                if (IMG_PREVIEW) {
-                    (IMG_PREVIEW as HTMLImageElement).src = reader.result as string;
-                    IMG_PREVIEW.classList.remove("d-none");
-                }
-            });
-        }
+            if (Object.values(validations).every(value => value)) {
+                //Create the restaurant object
+                const newRestaurant: RestaurantInsert = {
+                    name: (form.name as unknown as HTMLInputElement).value,
+                    description: form.description.value,
+                    daysOpen: checkedDays,
+                    cuisine: form.cuisine.value,
+                    phone: form.phone.value,
+                    address: address,
+                    lat: latitude,
+                    lng: longitude,
+                    image: imgPreview.src
+                };
+
+                await restaurantService.post(newRestaurant).then(() => {
+                    console.log("El restaurante a sido insertado");
+                    location.assign("index.html");
+                }).catch(error =>{
+                    confirm((error.message as string));
+                });
+            }
+
+        });
     });
-    }
-}

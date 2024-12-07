@@ -27,4 +27,10 @@ export class AuthService {
             throw error;
         }
     }
+
+    public logout(): void {
+        console.log("auth-service: Logout");
+        localStorage.removeItem("token");
+        location.reload();
+    }
 }
