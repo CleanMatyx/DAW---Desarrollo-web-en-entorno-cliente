@@ -183,8 +183,8 @@ export class RestaurantService {
         return this.more;
     }
 
-    // //Function that sets the page
-    // public setPage(page: number): void {
-    //     this.page = page;
-    // }
+    //Function that sets the page
+    public setPage(page: number): void {
+        this.page = page;
+    }
 }

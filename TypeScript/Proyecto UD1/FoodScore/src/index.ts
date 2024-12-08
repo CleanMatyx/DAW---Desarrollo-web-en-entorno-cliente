@@ -26,7 +26,7 @@ authService.checkToken();
 //If user is not logged, redirect to login page
 if (!localStorage.getItem('token')) {
     window.location.href = 'login.html';
-}
+ }
 
 //Logout button
 const logoutButton = document.querySelector("#logout");

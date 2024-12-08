@@ -42,6 +42,12 @@ if (logoutButton) {
 //Show the map
 showMap(user);
 
+if(user.me === false){
+    document.querySelector("#editProfile")?.classList.add("d-none");
+    document.querySelector("#editPassword")?.classList.add("d-none");
+    document.querySelector("label.btn.btn-sm")?.classList.add("d-none");
+}
+
 //Event listener to update the photo
 document.querySelector("#photoInput")?.addEventListener("change" , (event : Event) => {
     const file = (event.target as HTMLInputElement).files![0];
@@ -134,3 +140,8 @@ function showMap(user : User){
     const map = new MapService(coords, "map");
     map.createMarker(coords);
 }
+
+//Event listener to view the restaurants created by the user
+document.querySelector("#viewRestaurants")?.addEventListener("click", () => {
+    window.location.href = `index.html?creator=${user.id}`;
+});

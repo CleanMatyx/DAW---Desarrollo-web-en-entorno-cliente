@@ -152,7 +152,7 @@ async function showMap(): Promise<void> {
         longitude: restaurant.lng,
     };
     const mapService = new MapService(coords, "map");
-    mapService.createMarker(coords, "red");
+    mapService.createMarker(coords);
 }
 
 //Show owner function
@@ -161,7 +161,7 @@ function showOwner(): void {
     const divName = document.getElementById("creatorName") as HTMLAnchorElement;
     const divEmail = document.getElementById("creatorEmail") as HTMLElement;
     const divImg = document.getElementById("creatorImg") as HTMLImageElement;
-    const cardBody = document.getElementById("cardBody") as HTMLElement;
+    // const cardBody = document.getElementById("cardBody") as HTMLElement;
 
     if (restaurant.creator) {
         const profileUrl = `profile.html?id=${restaurant.creator.id}`;
@@ -173,9 +173,6 @@ function showOwner(): void {
 
         //Add event listeners to the elements to redirect to the creator profile
         divName.addEventListener('click', () => {
-            window.location.href = profileUrl;
-        });
-        cardBody.addEventListener('click', () => {
             window.location.href = profileUrl;
         });
     } else {
