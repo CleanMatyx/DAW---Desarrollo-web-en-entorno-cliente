@@ -1,6 +1,6 @@
 import { SERVER, USER_LOGIN_ENDPOINT, USER_REGISTER_ENDPOINT} from '../constants';
 import { Http } from './http';
-import { UserLogin, User, TokenResponse } from '../interfaces/user';
+import { UserLogin, User } from '../interfaces/user';
 
 
 export class AuthService {

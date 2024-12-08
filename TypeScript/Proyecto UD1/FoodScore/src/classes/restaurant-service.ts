@@ -1,27 +1,17 @@
 
 //Classes imports
 import { Http } from "./http";
-// import { Utils } from "./utils-service";
+import { Utils } from "./utils-service";
 
 //Interfaces imports
 import { Restaurant } from "../interfaces/restaurant";
 import { Comment } from "../interfaces/comment";
+import { User } from "../interfaces/user";
 import { RestaurantsResponse, SingleRestaurantResponse, SingleCommentResponse, CommentsResponse } from "../interfaces/responses";
 
 //Constants imports
-import { RESTAURANT_TEMPLATE } from "../constants";
-// import Handlebars from "handlebars";
-// // const restaurantTemplateElement = document.getElementById('restaurantTemplate');
-// // if (!restaurantTemplateElement) {
-// //     throw new Error("Restaurant template element not found");
-// // }
-// // const restaurantTemplate: Handlebars.TemplateDelegate = Handlebars.compile(restaurantTemplateElement.innerHTML);
-
-// const restaurantTemplate: Handlebars.TemplateDelegate = Handlebars.compile("../templates/restaurant.hbs");
-// const commentTemplate: Handlebars.TemplateDelegate = Handlebars.compile("../templates/comment.hbs");
 import { SERVER, RESTAURANTS_ENDPOINT } from "../constants";
-// import Swal from "sweetalert2";
-// const utils = new Utils();
+const utils = new Utils();
 
 export class RestaurantService {
     private http: Http;
@@ -31,23 +21,26 @@ export class RestaurantService {
 
     constructor() {
         this.http = new Http();
-        this.page = 1;
+        this.page = 0;
         this.search = "";
         this.more = false;
     }
 
+    //Get all the restaurants
     async getAll(): Promise<Restaurant[]> {
         console.log("rest-service: Getting All");
         const resp = this.http.get<RestaurantsResponse>(SERVER + RESTAURANTS_ENDPOINT);
         return (await resp).restaurants;
     }
 
+    //Get a restaurant by id
     async get(id: number): Promise<Restaurant> {
         console.log("rest-service: Getting " + id);
         const resp = this.http.get<SingleRestaurantResponse>(SERVER + RESTAURANTS_ENDPOINT + "/" + id);
         return (await resp).restaurant;
     }
 
+    //Post a restaurant
     async post(restaurant: Restaurant): Promise<Restaurant> {
         console.log("rest-service: Posting restaurant:");
         console.log(restaurant);
@@ -55,17 +48,27 @@ export class RestaurantService {
         return resp.restaurant;
     }
 
-    async delete(id: number): Promise<void> {
+    //Function that deletes a restaurant showing a confirmation dialog
+    delete(id: number): void {
         console.log("rest-service: Deleting: " + id);
-        return this.http.delete(SERVER + RESTAURANTS_ENDPOINT + "/" + id);
+        this.http.delete(SERVER + RESTAURANTS_ENDPOINT + "/" + id)
+            .then(() => {
+                console.log('Deleted! Your restaurant has been deleted.');
+            })
+            .catch((error) => {
+                console.error("Error deleting restaurant:", error);
+            });
+        
     }
 
+    //Function that gets the comments of a restaurant
     async getComments(restaurantId: number): Promise<Comment[]> {
         console.log("rest-service: getComments " + restaurantId);
         const resp = this.http.get<CommentsResponse>(SERVER + RESTAURANTS_ENDPOINT + "/" + restaurantId + "/comments");
         return (await resp).comments;
     }
 
+    //Function that adds a comment to a restaurant
     async addComment(restaurantId: number, comment: Comment): Promise<Comment> {
         console.log("rest-service: AddComment on: " + restaurantId);
         console.log(comment);
@@ -73,64 +76,86 @@ export class RestaurantService {
         return (await resp).comment;
     }
 
-    // public comment2HTML(comment: Comment): string | Node {
-    //     console.log(comment);
+    public comment2HTML(comment: Comment): string | Node {
+        console.log(comment);
+    
+        //Obtain the template
+        const template = document.getElementById('commentTemplate') as HTMLTemplateElement;
+        if (!template) {
+            throw new Error('Template not found');
+        }
+    
+        //Clone the template
+        const clone = template.content.cloneNode(true) as HTMLElement;
+    
+        //Fill the template with the comment data
+        const avatar = clone.querySelector('.avatar img') as HTMLImageElement;
+        const user: User = comment.user!;
+        if (!user) {
+            throw new Error('User not found');
+        }
+        avatar.src = user.avatar;
+        avatar.alt = user.name;
+    
+        const nameLink = clone.querySelector('.name') as HTMLAnchorElement;
+        nameLink.href = user.name;
+        nameLink.textContent = user.name;
+    
+        const commentText = clone.querySelector('.comment') as HTMLSpanElement;
+        commentText.textContent = comment.text;
+    
+        const starsContainer = clone.querySelector('.stars') as HTMLDivElement;
+        starsContainer.innerHTML = '★'.repeat(utils.getFullStars(comment).length) + '☆'.repeat(utils.getEmptyStars(comment).length);
+    
+        const dateElement = clone.querySelector('.date') as HTMLSpanElement;
+        dateElement.textContent = comment.date ? new Date(comment.date).toLocaleDateString() : "N/A";
+    
+        return clone;
+    }
 
-    //     const col: HTMLDivElement = document.createElement("div");
-    //     col.classList.add("col");
-
-    //     const commentHTML = commentTemplate({
-    //         ...comment,
-    //         fullStars: utils.getFullStars(comment),
-    //         emptyStars: utils.getEmptyStars(comment),
-    //     });
-
-    //     col.innerHTML = commentHTML;
-    //     return col;
-    // }
-
-    public restaurant2HTML(restaurant : Restaurant , deleteCard : () => Promise<void>) : HTMLDivElement {
-
-        const div : HTMLDivElement = document.createElement('div');
-        const restTemplate = RESTAURANT_TEMPLATE.content.cloneNode(true) as HTMLElement;
-
+    //Function that converts a restaurant object to an HTML element
+    public restaurant2HTML(restaurant: Restaurant, deleteCard: () => Promise<void>): HTMLDivElement {
+        const div: HTMLDivElement = document.createElement('div');
+        const restTemplate = (document.getElementById('restaurantTemplate') as HTMLTemplateElement).content.cloneNode(true) as HTMLElement;
+    
         (restTemplate.querySelector(".card-img-top") as HTMLImageElement).src = restaurant.image;
-        (restTemplate.querySelector(".card-title") as HTMLElement).textContent = restaurant.name;
-        (restTemplate.querySelector(".card-text") as HTMLElement).textContent = restaurant.description;
-        (restTemplate.querySelector("small.cuisine") as HTMLElement).textContent = restaurant.cuisine; 
-        (restTemplate.querySelector("span.phone") as HTMLElement).textContent = restaurant.phone;
-        (restTemplate.querySelector(".distance") as HTMLElement).textContent = 
-        restaurant.distance !== undefined ? Intl.NumberFormat('es-ES' , {maximumFractionDigits: 2}).format(restaurant.distance) + "km" : "N/A";
-
+        (restTemplate.querySelector(".card-title a") as HTMLElement).textContent = restaurant.name;
+        (restTemplate.querySelector(".card-text.description") as HTMLElement).textContent = restaurant.description;
+        (restTemplate.querySelector(".cuisine") as HTMLElement).textContent = restaurant.cuisine;
+        (restTemplate.querySelector(".phone span") as HTMLElement).textContent = restaurant.phone;
+        (restTemplate.querySelector(".distance") as HTMLElement).textContent =
+            restaurant.distance !== undefined ? Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(restaurant.distance) + " km" : "N/A";
+        (restTemplate.querySelector(".stars") as HTMLElement).innerHTML = utils.generateStars(restaurant.stars ?? 0);
+    
         (restTemplate.querySelector("div>a") as HTMLLinkElement).href = "restaurant-detail.html?id=" + restaurant.id;
-
-        (restTemplate.querySelector(".card-title") as HTMLElement).addEventListener("click" , () => {
+    
+        (restTemplate.querySelector(".card-title a") as HTMLElement).addEventListener("click", () => {
             location.assign("restaurant-detail.html?id=" + restaurant.id);
         });
-        
+    
         const day = new Date();
         const daysOpenArray = this.daysOpen(restaurant.daysOpen);
     
-        (restTemplate.querySelector("span.days") as HTMLElement).textContent += daysOpenArray.join(",");
+        //Set the days open
+        (restTemplate.querySelector(".days span") as HTMLElement).textContent = daysOpenArray.join(",");
     
-        if(restaurant.daysOpen.includes(day.getDay().toString())){
+        //If the restaurant is open today, hide the closed badge and show the open badge
+        if (restaurant.daysOpen.includes(day.getDay().toString())) {
             restTemplate.querySelector(".bg-danger")!.classList.add("d-none");
-        }else{
+        } else {
             restTemplate.querySelector(".bg-success")!.classList.add("d-none");
-        }  
-
-        if(restaurant.mine === false){            
+        }
+    
+        //If the restaurant is not mine, hide the delete button
+        if (restaurant.mine === false) {
             (restTemplate.querySelector(".delete") as HTMLElement).classList.add("d-none");
         }
-
-        restTemplate.querySelector("button.delete")!.addEventListener("click" , () => {
-            const tryDelete = confirm("Are you sure you want to delete this restaurant?");
-
-            if(tryDelete){
+    
+        (restTemplate.querySelector("button.delete") as HTMLElement).addEventListener("click", () => {
+            
                 deleteCard();
-            }
         });
-
+    
         div.append(restTemplate);
         return div;
     }
@@ -146,5 +171,13 @@ export class RestaurantService {
             6: "Sab"
         };
         return day.map(day => daysMap[day]);
+    }
+
+    public hasMoreRestaurants(): boolean {
+        return this.more;
+    }
+
+    public setPage(page: number): void {
+        this.page = page;
     }
 }

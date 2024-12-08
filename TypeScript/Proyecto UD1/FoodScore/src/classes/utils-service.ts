@@ -110,6 +110,19 @@ export class Utils {
         return restaurant.distance !== undefined ? parseFloat(restaurant.distance.toFixed(2)) : 0;
     }
 
+    public generateStars(rating: number): string {
+        const fullStar = '<i class="bi bi-star-fill"></i>';
+        const emptyStar = '<i class="bi bi-star"></i>';
+        const maxStars = 5;
+        let stars = '';
+    
+        for (let i = 0; i < maxStars; i++) {
+            stars += i < rating ? fullStar : emptyStar;
+        }
+    
+        return `${stars} ${rating.toFixed(2)}`;
+    }
+
 
     static imagePreview(input: HTMLInputElement): void {
         

@@ -1,31 +1,43 @@
-
+//Classes imports
 import { AuthService } from "./classes/auth-service";
 import { MapService } from "./classes/map-service";
 import { UserService } from "./classes/user-service";
+
+//Interfaces imports
 import { Coordinates } from "./interfaces/coordinates";
 import { User } from "./interfaces/user";
 
+//Services
 const authService = new AuthService();
 const userService = new UserService();
+
+//Get the id from the URL
 const id : number =parseInt(location.search.split("=")[1]);
 
-function mostrarMapa(user : User){
-    const coordenadas  = [user.lat ,user.lng];
-
-    const [latitude , longitude] = coordenadas;
-    const coords : Coordinates = {latitude , longitude};
-    
-    const mapa = new MapService( coords ,"map");
-    mapa.createMarker(coords);
-}
-
+//Get the user profile
 const user = await userService.getProfile(id);
+
+// //Check if the token is valid
+// authService.checkToken();
+
+// //If user is not logged, redirect to login page
+// if (!localStorage.getItem("token")) {
+//     window.location.href = "login.html";
+// }
+
+//Logout button
+const logoutButton = document.querySelector("#logout");
+if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
+        authService.logout();
+    });
+}
 
 (document.querySelector("#avatar") as HTMLImageElement).src = user.avatar;
 (document.querySelector("#name") as HTMLElement).textContent = user.name;
 (document.querySelector("#email") as HTMLElement).textContent = user.email;
 
-mostrarMapa(user);
+showMap(user);
 
 if(user.me === false){
     document.querySelector("#editProfile")?.classList.add("d-none");
@@ -103,8 +115,12 @@ const divFormPasswd = document.querySelector("#passwordForm") as HTMLElement;
     }
 })
 
-
-document.querySelector("#logout")?.addEventListener("click" , () => {
-    authService.logout();
-});
+//Function to show the map
+function showMap(user : User){
+    const coordinates  = [user.lat ,user.lng];
+    const [latitude , longitude] = coordinates;
+    const coords : Coordinates = {latitude , longitude};
+    const map = new MapService(coords, "map");
+    map.createMarker(coords);
+}
 
