@@ -1,4 +1,3 @@
-
 //Classes imports
 import { Http } from "./http";
 import { Utils } from "./utils-service";
@@ -76,6 +75,7 @@ export class RestaurantService {
         return (await resp).comment;
     }
 
+    //Function that converts a comment object to an HTML element
     public comment2HTML(comment: Comment): string | Node {
         console.log(comment);
     
@@ -97,19 +97,25 @@ export class RestaurantService {
         avatar.src = user.avatar;
         avatar.alt = user.name;
     
+        //Redirect to the user profile when clicking the avatar
         const nameLink = clone.querySelector('.name') as HTMLAnchorElement;
-        nameLink.href = user.name;
+        nameLink.href ='/profile.html?id=' + user.id;
         nameLink.textContent = user.name;
-    
+
+        //Redirect to the user profile when clicking the name
+        console.log(nameLink.href);
         const commentText = clone.querySelector('.comment') as HTMLSpanElement;
         commentText.textContent = comment.text;
     
+        //Fill the stars
         const starsContainer = clone.querySelector('.stars') as HTMLDivElement;
         starsContainer.innerHTML = '★'.repeat(utils.getFullStars(comment).length) + '☆'.repeat(utils.getEmptyStars(comment).length);
     
+        //Fill the date
         const dateElement = clone.querySelector('.date') as HTMLSpanElement;
         dateElement.textContent = comment.date ? new Date(comment.date).toLocaleDateString() : "N/A";
-    
+        
+        //Return the clone
         return clone;
     }
 
@@ -126,9 +132,7 @@ export class RestaurantService {
         (restTemplate.querySelector(".distance") as HTMLElement).textContent =
             restaurant.distance !== undefined ? Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(restaurant.distance) + " km" : "N/A";
         (restTemplate.querySelector(".stars") as HTMLElement).innerHTML = utils.generateStars(restaurant.stars ?? 0);
-    
         (restTemplate.querySelector("div>a") as HTMLLinkElement).href = "restaurant-detail.html?id=" + restaurant.id;
-    
         (restTemplate.querySelector(".card-title a") as HTMLElement).addEventListener("click", () => {
             location.assign("restaurant-detail.html?id=" + restaurant.id);
         });
@@ -150,9 +154,9 @@ export class RestaurantService {
         if (restaurant.mine === false) {
             (restTemplate.querySelector(".delete") as HTMLElement).classList.add("d-none");
         }
-    
+
+        //If the restaurant is mine, show the delete button
         (restTemplate.querySelector("button.delete") as HTMLElement).addEventListener("click", () => {
-            
                 deleteCard();
         });
     
@@ -160,6 +164,7 @@ export class RestaurantService {
         return div;
     }
 
+    //Function that converts a restaurant object to an HTML element
     daysOpen(day: string[]) {
         const daysMap: {[key: string]: string} = {
             0: "Dom",
@@ -173,11 +178,13 @@ export class RestaurantService {
         return day.map(day => daysMap[day]);
     }
 
+    //Function that gets the next page of restaurants
     public hasMoreRestaurants(): boolean {
         return this.more;
     }
 
-    public setPage(page: number): void {
-        this.page = page;
-    }
+    // //Function that sets the page
+    // public setPage(page: number): void {
+    //     this.page = page;
+    // }
 }

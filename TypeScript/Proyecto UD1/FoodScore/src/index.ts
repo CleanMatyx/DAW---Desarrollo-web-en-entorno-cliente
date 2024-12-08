@@ -20,13 +20,13 @@ let currentPage = 1;
 let arrayGlobalRestaurantes: Restaurant[] = [];
 const http = new Http();
 
-// //Check if token is valid
-// authService.checkToken();
+//Check if token is valid
+authService.checkToken();
 
- //If user is not logged, redirect to login page
- if (!localStorage.getItem('token')) {
-     window.location.href = 'login.html';
- }
+//If user is not logged, redirect to login page
+if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+}
 
 //Logout button
 const logoutButton = document.querySelector("#logout");

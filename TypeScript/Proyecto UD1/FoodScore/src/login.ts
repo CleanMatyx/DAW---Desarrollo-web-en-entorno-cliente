@@ -1,7 +1,13 @@
+//Import classes
 import { MyGeolocation } from './classes/my-geolocation';
+
+//Import interfaces
 import { Coordinates } from './interfaces/coordinates';
+
+//Import constants
 import { SERVER, USER_LOGIN_ENDPOINT } from './constants';
 
+//Event listener to login the user
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-login') as HTMLFormElement;
   const errorInfo = document.getElementById('errorInfo') as HTMLParagraphElement;

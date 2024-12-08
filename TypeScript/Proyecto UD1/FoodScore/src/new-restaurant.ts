@@ -18,13 +18,13 @@ import { Utils } from "./classes/utils-service.ts";
 //Services
 const authService = new AuthService();
 
-// //Check if the token is valid
-// authService.checkToken();
+//Check if the token is valid
+authService.checkToken();
 
-// //If user is not logged, redirect to login page
-// if (!localStorage.getItem("token")) {
-//     window.location.href = "login.html";
-// }
+//If user is not logged, redirect to login page
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
 
 //Logout button
 const logoutButton = document.querySelector("#logout");

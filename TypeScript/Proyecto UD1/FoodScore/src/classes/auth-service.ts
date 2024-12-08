@@ -1,7 +1,9 @@
+//Import constants
 import { SERVER, USER_LOGIN_ENDPOINT, USER_REGISTER_ENDPOINT} from '../constants';
 import { Http } from './http';
-import { UserLogin, User } from '../interfaces/user';
 
+//Import interfaces
+import { UserLogin, User } from '../interfaces/user';
 
 export class AuthService {
     private _http: Http;
@@ -10,6 +12,7 @@ export class AuthService {
         this._http = new Http();
     }
 
+    //Function to login
     async login(userLogin: UserLogin): Promise<void> {
         try {
             await this._http.post(`${SERVER}${USER_LOGIN_ENDPOINT}`, userLogin);
@@ -19,6 +22,7 @@ export class AuthService {
         }
     }
 
+    //Function to register
     async register(userInfo: User): Promise<void> {
         try {
             await this._http.post(`${SERVER}${USER_REGISTER_ENDPOINT}`, userInfo);
@@ -28,12 +32,13 @@ export class AuthService {
         }
     }
 
+    //Function to logout
     public logout(): void {
-        console.log("auth-service: Logout");
         localStorage.removeItem("token");
-        location.reload();
+        location.assign("login.html");
     }
 
+    //Function to check if the token is valid
     async checkToken() : Promise<void>{
         try {
             await this._http.get<void>(`${SERVER}/auth/validate`);

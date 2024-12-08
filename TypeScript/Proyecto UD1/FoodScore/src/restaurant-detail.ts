@@ -15,13 +15,13 @@ import Swal from "sweetalert2";
 
 const authService = new AuthService();
 
-// //Check if the token is valid
-// authService.checkToken();
+//Check if the token is valid
+authService.checkToken();
 
-// //If user is not logged, redirect to login page
-// if (!localStorage.getItem("token")) {
-//     window.location.href = "login.html";
-// }
+//If user is not logged, redirect to login page
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
+}
 
 //Logout button
 const logoutButton = document.querySelector("#logout");
@@ -141,6 +141,7 @@ if (divStars) {
     });
 }
 
+//Show map function
 async function showMap(): Promise<void> {
     const restAdress = (await document.getElementById(
         "address"
@@ -154,17 +155,29 @@ async function showMap(): Promise<void> {
     mapService.createMarker(coords, "red");
 }
 
+//Show owner function
 function showOwner(): void {
-    const divName = document.getElementById("creatorName") as HTMLElement;
+    //DOM elements
+    const divName = document.getElementById("creatorName") as HTMLAnchorElement;
     const divEmail = document.getElementById("creatorEmail") as HTMLElement;
     const divImg = document.getElementById("creatorImg") as HTMLImageElement;
+    const cardBody = document.getElementById("cardBody") as HTMLElement;
 
     if (restaurant.creator) {
+        const profileUrl = `profile.html?id=${restaurant.creator.id}`;
+
         divName.textContent = restaurant.creator.name;
+        divName.href = profileUrl;
         divEmail.textContent = restaurant.creator.email;
         divImg.src = restaurant.creator.avatar;
-        divImg.src = restaurant.creator.avatar;
-        divImg.src = restaurant.creator.avatar;
+
+        //Add event listeners to the elements to redirect to the creator profile
+        divName.addEventListener('click', () => {
+            window.location.href = profileUrl;
+        });
+        cardBody.addEventListener('click', () => {
+            window.location.href = profileUrl;
+        });
     } else {
         console.error("Restaurant creator is undefined");
     }

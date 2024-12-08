@@ -1,6 +1,10 @@
+//Import classes
 import { MyGeolocation } from './classes/my-geolocation';
+
+//Import constants
 import { SERVER, USER_REGISTER_ENDPOINT } from './constants';
 
+//Event listener to get the user location
 document.addEventListener('DOMContentLoaded', () => {
   const latInput = document.getElementById('lat') as HTMLInputElement;
   const lngInput = document.getElementById('lng') as HTMLInputElement;
@@ -18,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+//Event listener to register the user
 document.getElementById('form-register')?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -82,6 +87,7 @@ document.getElementById('form-register')?.addEventListener('submit', async (even
   }
 });
 
+//Event listener to preview the image
 document.getElementById('photo')?.addEventListener('change', (event) => {
 const fileInput = event.target as HTMLInputElement;
 const file = fileInput.files?.[0];
