@@ -49,7 +49,7 @@ document.getElementById('form-register')?.addEventListener('submit', async (even
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      // Extraer solo la parte base64 sin el prefijo data:image/*;base64,
+      //Remove the base64 header
       const base64String = (reader.result as string).split(',')[1];
       resolve(base64String);
     };
@@ -73,7 +73,7 @@ document.getElementById('form-register')?.addEventListener('submit', async (even
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data, null, 2), // Formatear JSON con indentación
+      body: JSON.stringify(data, null, 2),
     });
 
     if (response.status === 201) {

@@ -38,7 +38,7 @@ const form = FORM_RESTAURANT;
 
 // const restaurantService = new RestaurantService();
 
-// Add event listener to the form to handle the image preview
+//Add event listener to the form to handle the image preview
 const imgPreview = IMG_PREVIEW;
 Utils.imagePreview(form.image as HTMLInputElement);
 
@@ -108,10 +108,9 @@ showMap().then(() => {
 
             //Post the restaurant
             await restaurantService.post(newRestaurant).then(() => {
-                console.log("El restaurante a sido insertado");
                 location.assign("index.html");
             }).catch(error =>{
-                confirm((error.message as string));
+                Utils.createSweetAlert("Error", error, "error");
             });
         }
     });
