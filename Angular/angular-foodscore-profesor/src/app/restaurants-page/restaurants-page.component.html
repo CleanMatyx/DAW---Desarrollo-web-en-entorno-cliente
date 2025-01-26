@@ -1,120 +1,37 @@
-<form class="mt-4" (ngSubmit)="addRestaurant()">
-  <div class="mb-3">
-    <label for="name">Nombre</label>
-    <input
-      type="text"
-      class="form-control"
-      name="name"
-      id="name"
-      placeholder="Enter name"
-      [(ngModel)]="newRestaurant.name"
+<nav class="navbar navbar-light bg-light justify-content-between mt-3">
+  <div class="col-auto ms-3">
+    <input 
+    type="checkbox" 
+    class="btn-check" 
+    id="show-open"
+    [(ngModel)]="showOpen"
     />
+    <label class="btn btn-outline-primary" for="show-open">Show open</label>
   </div>
-  <div class="mb-3">
-    <label for="description">Descripción</label>
-    <textarea
-      class="form-control"
-      id="description"
-      name="description"
-      rows="3"
-      placeholder="Description"
-      [(ngModel)]="newRestaurant.description"
-    ></textarea>
-  </div>
-  <div class="mb-3">
-    <label for="cuisine">Cocina</label>
-    <input
-      type="text"
-      class="form-control"
-      name="cuisine"
-      id="cuisine"
-      placeholder="Cuisine"
-      [(ngModel)]="newRestaurant.cuisine"
+  <form class="container-fluid mb-0 col">
+  <input 
+    type="text" 
+    class="form-control" 
+    name="search" 
+    [(ngModel)]="search"
+    placeholder="Filtrar" 
+    aria-label="Search"
     />
-  </div>
-  <p>Días de apertura</p>
-  <div class="mb-3">
-    @for(day of days; track $index; let i = $index) {
-    <div class="form-check form-check-inline">
-      <input
-        type="checkbox"
-        class="custom-control-input"
-        id="checkDay{{ i }}"
-        name="days"
-        [(ngModel)]="daysOpen[i]"
-      />
-      <label class="custom-control-label ms-2" for="checkDay{{ i }}">{{
-        day
-      }}</label>
-    </div>
+  </form>
+</nav>
+
+<restaurant-form (add)="addRestaurant($event)"></restaurant-form>
+
+<div id="placesContainer" class="mb-4 mt-4 row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+  @if (restaurantsFiltered().length) { 
+    @for (restaurant of restaurantsFiltered(); track $index; let i = $index) {
+      <restaurant-card
+      [restaurant] = "restaurant"
+      (deleted) = "deleteRestaurant(restaurant)"
+      class = "col">
+      </restaurant-card>
     }
-  </div>
-  <div class="mb-3">
-    <label for="phone">Teléfono</label>
-    <input
-      type="number"
-      class="form-control"
-      id="phone"
-      name="phone"
-      placeholder="Phone number"
-      [(ngModel)]="newRestaurant.phone"
-    />
-  </div>
-  <div class="mb-3">
-    <label for="image">Main photo</label>
-    <input
-      type="file"
-      class="form-control"
-      id="image"
-      name="image"
-      [(ngModel)]="filename"
-      (change)="changeImage($event)"
-    />
-  </div>
-  @if(newRestaurant.image) {
-    <img [src]="newRestaurant.image" alt="" id="imgPreview" class="img-thumbnail mb-3" />
-  }
-
-  <div>
-    <button type="submit" class="btn btn-primary">Crear</button>
-  </div>
-</form>
-
-<div
-  id="placesContainer"
-  class="mb-4 mt-4 row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"
->
-  @for (restaurant of restaurants; track $index) {
-  <!-- Aún no tenemos id -->
-  <div class="col">
-    <div class="card h-100 shadow">
-      <img class="card-img-top" [src]="restaurant.image" alt="" />
-      <div class="card-body">
-        <button class="btn btn-danger delete" (click)="deleteRestaurant($index)">
-          <i class="bi bi-trash"></i>
-        </button>
-        <h4 class="card-title">{{ restaurant.name }}</h4>
-        <p class="card-text">{{ restaurant.description }}</p>
-        <div class="card-text">
-          <small class="text-muted">
-            <strong>Días: </strong> {{ getOpenDayNames(restaurant.daysOpen) }}
-          </small>
-          @if(restaurant.daysOpen[weekDay]) {
-          <span class="badge ms-2 bg-success">Abierto</span>
-          } @else {
-          <span class="badge ms-2 bg-danger">Cerrado</span>
-          }
-        </div>
-        <div class="card-text">
-          <small class="text-muted phone">
-            <strong>Teléfono: </strong> {{ restaurant.phone }}
-          </small>
-        </div>
-      </div>
-      <div class="card-footer">
-        <small class="text-muted">{{ restaurant.cuisine }}</small>
-      </div>
-    </div>
-  </div>
+  } @else {
+    <h3 class="p-4">No hay restaurantes disponibles</h3>
   }
 </div>

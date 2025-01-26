@@ -1,11 +1,10 @@
 import { ChangeDetectorRef, Component, inject, output } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Product } from '../interfaces/product';
-import { EncodeBase64Directive } from '../directives/encode-base64.directive';
 
 @Component({
   selector: 'product-form',
-  imports: [FormsModule, EncodeBase64Directive],
+  imports: [FormsModule],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.css'
 })
