@@ -7,11 +7,10 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Product } from '../interfaces/product';
 import { ProductItemComponent } from '../product-item/product-item.component';
-import { ProductFormComponent } from '../product-form/product-form.component';
 
 @Component({
   selector: 'products-page',
-  imports: [FormsModule, ProductItemComponent, ProductFormComponent],
+  imports: [FormsModule, ProductItemComponent],
   templateUrl: './products-page.component.html',
   styleUrl: './products-page.component.css',
 })

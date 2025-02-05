@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Component, inject, output } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { ChangeDetectorRef, Component, inject} from '@angular/core';
+import { FormsModule} from '@angular/forms';
 import { Product } from '../interfaces/product';
 
 @Component({
@@ -9,18 +9,22 @@ import { Product } from '../interfaces/product';
   styleUrl: './product-form.component.css'
 })
 export class ProductFormComponent {
-  newProduct = {
-    id: 4,
+  // Quitamos el ouput 'add'
+  newProduct: Product = {
+    id: 0,
     description: '',
-    price: 0,
     available: '',
     imageUrl: '',
     rating: 1,
+    price: 0,
   };
+
+  #productsService = inject(ProductsService);
+  #router = inject(Router);
 
   #changeDetector = inject(ChangeDetectorRef);
 
-  add = output<Product>();
+  // add = output<Product>();
 
   changeImage(event: Event) {
     const fileInput = event.target as HTMLInputElement;
@@ -33,10 +37,9 @@ export class ProductFormComponent {
     });
   }
 
-  addProduct(form: NgForm) {
-    this.add.emit({...this.newProduct});
-    form.resetForm();
-    this.newProduct.imageUrl = '';
-    this.newProduct.id++;
+  addProduct() { // No necesitamos el formulario (NgForm) para resetearlo
+    this.#productsService
+      .insertProduct(this.newProduct)
+      .subscribe(() => this.#router.navigate(['/products']));
   }
 }
