@@ -1,150 +1,159 @@
+//Classes imports
 import { RestaurantService } from './classes/restaurant-service.ts';
+import { AuthService } from "./classes/auth-service";
+import { SERVER } from './constants';
+import { Http } from './classes/http.ts';
 
-let arrayGlobalRestaurantes = [];
+//Interfaces imports
+import { Restaurant } from './interfaces/restaurant.ts';
+import swal from 'sweetalert2';
+
+const authService = new AuthService();
+const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+const searchBtn = document.getElementById('searchBtn');
+const container = <HTMLDivElement>document.getElementById("placesContainer");
+const loadMoreButton = document.getElementById('loadMore');
 const restaurantsService = new RestaurantService();
+let currentPage = 1;
 
-// Cargar restaurantes al iniciar
-async function init() {
-    try {
-        arrayGlobalRestaurantes = await restaurantsService.getAll();
-        showRestaurants(arrayGlobalRestaurantes);
-        setupSearchListener();
-    } catch (error) {
-        console.error('Error al cargar restaurantes:', error);
-    }
-}
+//Restaurant array
+let arrayGlobalRestaurantes: Restaurant[] = [];
+const http = new Http();
 
-// Función para configurar el listener del input de búsqueda
-function setupSearchListener() {
-    const searchInput = document.getElementById('search');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const filtered = filterRestaurants(e.target.value);
-            showRestaurants(filtered);
-        });
-    }
-}
+//Check if token is valid
+authService.checkToken();
 
-// Función para filtrar restaurantes por nombre o descripción
-function filterRestaurants(searchTerm) {
-    searchTerm = searchTerm.toLowerCase();
-    return arrayGlobalRestaurantes.filter(restaurant => 
-        restaurant.name.toLowerCase().includes(searchTerm) ||
-        restaurant.description.toLowerCase().includes(searchTerm)
-    );
-}
+//If user is not logged, redirect to login page
+if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+ }
 
-async function handleDelete(id, cardElement) {
-    console.log('Iniciando handleDelete con:', { id, cardElement });
-    
-    try {
-        // Verificar que tenemos el servicio
-        if (!restaurantsService) {
-            throw new Error('restaurantsService no está definido');
-        }
-
-        if (confirm('¿Está seguro de que desea eliminar este restaurante?')) {
-            // Intentar eliminar
-            await restaurantsService.delete(id);
-
-            // Actualizar array global
-            arrayGlobalRestaurantes = arrayGlobalRestaurantes.filter(r => r.id !== id);
-
-            // Eliminar del DOM
-            cardElement.remove();
-        }
-    } catch (error) {
-        console.error('Error en handleDelete:', error);
-        alert('Error al eliminar el restaurante: ' + error.message);
-    }
-}
-
-// Función para mostrar productos actualizada
-function showRestaurants(restaurants) {
-    const placesContainer = document.getElementById('placesContainer');
-    const template = document.getElementById('restaurantTemplate');
-    
-    // Limpiar contenedor
-    placesContainer.textContent = '';
-    
-    // Mapear días de la semana para mostrar
-    const daysMap = {
-        0: "Su",
-        1: "Mo",
-        2: "Tu",
-        3: "We",
-        4: "Th",
-        5: "Fr",
-        6: "Sa"
-    };
-
-    restaurants.forEach(restaurant => {
-        try {
-            const clone = template.content.cloneNode(true);
-            const cardElement = clone.querySelector('.card');
-            
-            // Rellenar datos básicos
-            clone.querySelector('.card-title').textContent = restaurant.name;
-            clone.querySelector('.card-text').textContent = restaurant.description;
-            
-            // Rellenar días
-            const daysElement = clone.querySelector('.text-muted strong').parentElement;
-            if (restaurant.daysOpen) {
-                const dayNames = restaurant.daysOpen.map(day => daysMap[day]);
-                daysElement.textContent = `Días: ${dayNames.join(', ')}`;
-            } else {
-                daysElement.textContent = 'Días: No especificados';
-            }
-            
-            // Rellenar teléfono
-            const phoneElement = clone.querySelector('.phone');
-            phoneElement.textContent = `Teléfono: ${restaurant.phone || 'No disponible'}`;
-            
-            // Configurar badges
-            const openBadge = clone.querySelector('.badge.bg-success');
-            const closedBadge = clone.querySelector('.badge.bg-danger');
-            const isOpen = isRestaurantOpen(restaurant);
-            openBadge.style.display = isOpen ? 'inline-block' : 'none';
-            closedBadge.style.display = isOpen ? 'none' : 'inline-block';
-            
-            // Configurar imagen
-            if (restaurant.image) {
-                clone.querySelector('.card-img-top').src = restaurant.image;
-            }
-
-            // Configurar botón eliminar
-            const deleteBtn = clone.querySelector('.delete');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleDelete(restaurant.id, cardElement);
-                });
-            }
-
-            // Rellenar tipo de cocina
-            const footerElement = clone.querySelector('.card-footer .text-muted');
-            footerElement.textContent = `${restaurant.cuisine || 'No especificada'}`;
-            
-            // Agregar al DOM
-            placesContainer.appendChild(clone);
-        } catch (error) {
-            console.error('Error al mostrar restaurante:', error);
-        }
+//Logout button
+const logoutButton = document.querySelector("#logout");
+if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
+    authService.logout();
     });
 }
 
-function isRestaurantOpen(restaurant) {
-    // Validación inicial
-    if (!restaurant || !restaurant.daysOpen || !Array.isArray(restaurant.daysOpen)) {
-        return false;
-    }
-
-    const now = new Date();
-    const currentDay = now.getDay().toString(); // Convertir a string para comparar
-    
-    return restaurant.daysOpen.includes(currentDay);
+//Function that gets all the restaurants from the API
+async function getRestaurants(): Promise<void> {
+    arrayGlobalRestaurantes = await restaurantsService.getAll() as Restaurant[];
+    showRestaurants(arrayGlobalRestaurantes);
 }
 
-// Iniciar la aplicación
-document.addEventListener('DOMContentLoaded', init);
+//Function that shows the restaurants in the container
+ function showRestaurants(restaurants: Restaurant[]): void {
+     //container.replaceChildren();
+     checkIfMoreRestaurants();
+     restaurants.forEach(restaurant => addRestaurantCard(restaurant));
+ }
+
+//Call the function to get all the restaurants
+getRestaurants();
+
+//Function that adds a restaurant card to the container
+function addRestaurantCard(restaurant : Restaurant){
+    const divElement : HTMLDivElement =  restaurantsService.restaurant2HTML(restaurant, async() => {
+        if (restaurant.id !== undefined) {
+            const confirmed = await swal.fire({
+                title: "¿Estás seguro?",
+                text: "¿Estás seguro de que deseas eliminar este restaurante?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Eliminar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (confirmed.isConfirmed) {
+                await restaurantsService.delete(restaurant.id);
+                divElement.remove();
+            }
+        } else {
+            console.error('Restaurant ID is undefined');
+        }
+    });
+    // Append the div element to the container
+    container.append(divElement);
+}
+
+//Function to check if there are more restaurants available
+function checkIfMoreRestaurants(): void {
+    const loadMoreButton = document.querySelector("#loadMoreButton");
+    if (restaurantsService.hasMoreRestaurants()) {
+        loadMoreButton?.classList.remove('hidden');
+    } else {
+        loadMoreButton?.classList.add('hidden');
+    }
+}
+
+//Listener for the search button
+searchBtn?.addEventListener('click', () => {
+    filterRestaurants();
+});
+
+//Listener for the search input
+searchInput?.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        filterRestaurants();
+    }
+});
+
+// Function to filter the restaurants by name or description
+ function filterRestaurants() {
+     currentPage = 1;
+     const searchText = searchInput.value.toLowerCase();
+     const filterInfo = document.getElementById('filterInfo');
+     if (filterInfo) {
+         filterInfo.textContent = `Filtrando por: ${searchText}`;
+     }
+     loadRestaurants(searchText, currentPage, true);
+ }
+
+// Function to load more restaurants
+function loadMoreRestaurants() {
+    currentPage++;
+    const searchText = searchInput.value.toLowerCase();
+    loadRestaurants(searchText, currentPage, false);
+}
+
+// Function to load restaurants
+async function loadRestaurants(search: string, page: number, replace: boolean) {
+    const params = new URLSearchParams({ page: String(page), search });
+    const url = `${SERVER}/restaurants?${params.toString()}`;
+    const data = await http.get<{ restaurants: Restaurant[], count: number, page: number, more: boolean }>(url);
+
+    // Replace the restaurants if the replace parameter is true
+    if (replace) {
+        container.innerHTML = '';
+    }
+
+    // Update the load more button by disabling it if there are no more restaurants
+    if (loadMoreButton) {
+        if (!data.more) {
+            (loadMoreButton as HTMLButtonElement).classList.add('d-none');
+        } else {
+            (loadMoreButton as HTMLButtonElement).classList.remove('d-none');
+        }
+    }
+
+    //Show the restaurants
+    showRestaurants(data.restaurants);
+}
+
+// Listener for the search button
+searchBtn?.addEventListener('click', () => {
+    filterRestaurants();
+});
+
+// Listener for the search input
+searchInput?.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        filterRestaurants();
+    }
+});
+
+// Listener for the load more button
+ loadMoreButton?.addEventListener('click', () => {
+     loadMoreRestaurants();
+});

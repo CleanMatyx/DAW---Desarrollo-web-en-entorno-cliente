@@ -33,3 +33,7 @@ export interface SingleCommentResponse {
     comment: Comment;
 }
 
+export interface LoginError {
+    status: number;
+    error: string;
+}

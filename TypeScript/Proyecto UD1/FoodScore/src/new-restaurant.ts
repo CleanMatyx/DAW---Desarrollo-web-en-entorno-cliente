@@ -1,123 +1,117 @@
-import { RestaurantService } from './restaurant-service.class.js';
-
 "use strict";
 
-const formRestaurant = document.getElementById("newRestaurant");
-const imgPreview = document.getElementById("imgPreview");
-const daysError = document.getElementById("daysError");
-const nameRegex = /^[A-Za-z][A-Za-z\s]*$/;
-const phoneRegex = /^\d{9}$/;
-const withoutSpaceRegex = /^[A-Za-z][A-Za-z\s]+$/;
-const restaurantService = new RestaurantService();
+//Classes imports
+import { RestaurantService } from './classes/restaurant-service.ts';
+import { RestaurantInsert } from './interfaces/restaurant.ts';
+import { AuthService } from './classes/auth-service.ts';
 
-function validateForm(form, name, nameRegex, description, cuisine, days, daysError, phone, phoneRegex, image) {
-    let isValid = true;
+//Map imports
+import { MapService } from './classes/map-service.ts';
+import { MyGeolocation } from './classes/my-geolocation.ts';
+import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete";
+import { Point } from "ol/geom";
 
-    // Validar nombre
-    if (!name || !nameRegex.test(name)) {
-        form.name.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.name.classList.remove('is-invalid');
-    }
+//Constants
+import { FORM_RESTAURANT, IMG_PREVIEW } from './constants.ts';
+import { Utils } from "./classes/utils-service.ts";
 
-    // Validar descripción
-    if (!description || description.length < 10) {
-        form.description.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.description.classList.remove('is-invalid');
-    }
+//Services
+const authService = new AuthService();
 
-    // Validar cocina
-    if (!cuisine || !withoutSpaceRegex.test(cuisine)) {
-        form.cuisine.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.cuisine.classList.remove('is-invalid');
-    }
+//Check if the token is valid
+authService.checkToken();
 
-    // Validar días
-    if (days.length === 0) {
-        daysError.style.display = 'block';
-        isValid = false;
-    } else {
-        daysError.style.display = 'none';
-    }
-
-    // Validar teléfono
-    if (!phone || !phoneRegex.test(phone)) {
-        form.phone.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.phone.classList.remove('is-invalid');
-    }
-
-    // Validar imagen
-    if (!image) {
-        form.image.classList.add('is-invalid');
-        isValid = false;
-    } else {
-        form.image.classList.remove('is-invalid');
-    }
-
-    return isValid;
+//If user is not logged, redirect to login page
+if (!localStorage.getItem("token")) {
+    window.location.href = "login.html";
 }
 
-formRestaurant.addEventListener('submit', async (e) => {
-    e.preventDefault();
+//Logout button
+const logoutButton = document.querySelector("#logout");
+if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
+        authService.logout();
+    });
+}
+//Restaurant form
+const form = FORM_RESTAURANT;
+
+// const restaurantService = new RestaurantService();
+
+//Add event listener to the form to handle the image preview
+const imgPreview = IMG_PREVIEW;
+Utils.imagePreview(form.image as HTMLInputElement);
+
+//Map service
+let latitude: number;
+let longitude: number;
+
+//Show the map and the autocomplete
+async function showMap(): Promise<void> {
+    //Assing the current location to the map
+    const currentUserLocation = await MyGeolocation.getLocation();
+    const mapService = new MapService(currentUserLocation, "map");
+    const marker = mapService.createMarker(currentUserLocation);
+    const autocomplete = new GeocoderAutocomplete(document.querySelector("#autocomplete")!,
+        "2fffc31efada4e81b10675e9a7e5d5bc", { lang: "es", debounceDelay: 600 });
     
-    const name = formRestaurant.name.value.trim();
-    const description = formRestaurant.description.value.trim();
-    const cuisine = formRestaurant.cuisine.value.trim();
-    const days = Array.from(formRestaurant.days)
-        .filter((i) => i.checked)
-        .map(day => day.value);
-    const phone = formRestaurant.phone.value.trim();
-    const image = formRestaurant.image.files[0];
+        latitude = currentUserLocation.latitude;
+        longitude = currentUserLocation.longitude;
+    
+        const mapView = mapService.view;
+    
+        autocomplete.on("select", (location) => {
+            [latitude, longitude] = location.geometry.coordinates;
+            marker.setGeometry(new Point([latitude, longitude]));
+            mapView.setCenter([latitude, longitude]);
+        });
+}
+    
+//Show the map then add the event listener to the form
+showMap().then(() => {
+    const restaurantService = new RestaurantService();
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
 
-    if (validateForm(formRestaurant, name, nameRegex, description, cuisine, days, daysError, phone, phoneRegex, image)) {
-        try {
-            // Convertir imagen a base64
-            const base64Image = await new Promise((resolve, reject) => {
-                if (!image) {
-                    reject(new Error('No se ha seleccionado ninguna imagen'));
-                }
-                
-                const reader = new FileReader();
-                reader.readAsDataURL(image);
-                reader.onload = () => {
-                    // Extraer solo la parte base64 sin el prefijo data:image/*;base64,
-                    const base64String = reader.result.split(',')[1];
-                    resolve(base64String);
-                };
-                reader.onerror = error => reject(new Error(`Error al leer la imagen: ${error.message}`));
-            });
+        //Check the days
+        const checkedDays = Array.from(form.days as NodeListOf<HTMLInputElement>)
+            .filter((input: HTMLInputElement) => input.checked)
+            .map((input: HTMLInputElement) => input.value + "");
 
-            const restaurant = {
-                title: name,
-                description,
-                cuisine,
-                days,
-                phone,
-                image: base64Image
+        const address = (document.querySelector(".geoapify-autocomplete-input") as HTMLInputElement).value;
+
+        //Check fields
+        const formValideFields = new Utils;
+        const validations: { [key: string]: boolean } = {
+            "name": formValideFields.validateName(form),
+            "description": formValideFields.validateDescription(form),
+            "phone": formValideFields.validatePhone(form),
+            "cuisine": formValideFields.validateCuisine(form),
+            "days" : formValideFields.validateDays(checkedDays),
+            "image": formValideFields.validateImage(form)
+        };
+
+        //Check if all the fields are valid
+        if (Object.values(validations).every(value => value)) {
+            //Create the restaurant object
+            const newRestaurant: RestaurantInsert = {
+                name: (form.name as unknown as HTMLInputElement).value,
+                description: form.description.value,
+                daysOpen: checkedDays,
+                cuisine: form.cuisine.value,
+                phone: form.phone.value,
+                address: address,
+                lat: latitude,
+                lng: longitude,
+                image: imgPreview.src
             };
 
-            await restaurantService.post(restaurant);
-            location.assign('index.html');
-        } catch (error) {
-            console.error('Error al crear restaurante:', error);
-            alert(error.message || 'Error al crear el restaurante');
+            //Post the restaurant
+            await restaurantService.post(newRestaurant).then(() => {
+                location.assign("index.html");
+            }).catch(error =>{
+                Utils.createSweetAlert("Error", error, "error");
+            });
         }
-    }
-});
-
-formRestaurant.image.addEventListener('change', event => {
-    let file = event.target.files[0];
-    let reader = new FileReader();
-    if (file) reader.readAsDataURL(file);
-    reader.addEventListener('load', e => {
-        imgPreview.src = reader.result;
-        imgPreview.classList.remove("d-none");
     });
 });

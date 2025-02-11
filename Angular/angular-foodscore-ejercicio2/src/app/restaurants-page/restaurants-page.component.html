@@ -1,0 +1,37 @@
+<nav class="navbar navbar-light bg-light justify-content-between mt-3">
+  <div class="col-auto ms-3">
+    <input 
+    type="checkbox" 
+    class="btn-check" 
+    id="show-open"
+    [(ngModel)]="showOpen"
+    />
+    <label class="btn btn-outline-primary" for="show-open">Show open</label>
+  </div>
+  <form class="container-fluid mb-0 col">
+  <input 
+    type="text" 
+    class="form-control" 
+    name="search" 
+    [(ngModel)]="search"
+    placeholder="Filtrar" 
+    aria-label="Search"
+    />
+  </form>
+</nav>
+
+<restaurant-form (add)="addRestaurant($event)"></restaurant-form>
+
+<div id="placesContainer" class="mb-4 mt-4 row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+  @if (restaurantsFiltered().length) { 
+    @for (restaurant of restaurantsFiltered(); track $index; let i = $index) {
+      <restaurant-card
+      [restaurant] = "restaurant"
+      (deleted) = "deleteRestaurant(restaurant)"
+      class = "col">
+      </restaurant-card>
+    }
+  } @else {
+    <h3 class="p-4">No hay restaurantes disponibles</h3>
+  }
+</div>
