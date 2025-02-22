@@ -1,14 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Restaurant } from '../interfaces/restaurant';
-import { RestaurantFormComponent } from '../restaurant-form/restaurant-form.component';
 import { RestaurantCardComponent } from '../restaurant-card/restaurant-card.component';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RestaurantsService } from '../services/restaurants.service';
 
 @Component({
   selector: 'restaurants-page',
-  imports: [FormsModule, RestaurantFormComponent, RestaurantCardComponent],
+  imports: [FormsModule, RestaurantCardComponent],
   templateUrl: './restaurants-page.component.html',
   styleUrl: './restaurants-page.component.css',
 })

@@ -1,14 +1,17 @@
+import { JsonPipe } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EncodeBase64Directive } from '../../shared/directives/encode-base64.directive';
+import { ValidationClassesDirective } from '../../shared/directives/validation-classes.directive';
 import { CanComponentDeactivate } from '../../shared/guards/leave-page.guard';
 import { ProductsService } from '../services/products.service';
+import { MinDateDirective } from '../../shared/directives/min-date.directive';
 
 @Component({
   selector: 'product-form',
-  imports: [FormsModule, EncodeBase64Directive],
+  imports: [FormsModule, EncodeBase64Directive, ValidationClassesDirective, MinDateDirective],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.css',
 })

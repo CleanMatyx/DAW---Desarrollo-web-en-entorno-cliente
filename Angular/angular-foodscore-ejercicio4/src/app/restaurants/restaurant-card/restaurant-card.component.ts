@@ -2,10 +2,11 @@ import { Component, DestroyRef, inject, input, output } from '@angular/core';
 import { Restaurant } from '../interfaces/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'restaurant-card',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './restaurant-card.component.html',
   styleUrl: './restaurant-card.component.css',
 })

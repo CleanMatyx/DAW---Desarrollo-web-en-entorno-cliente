@@ -1,9 +1,30 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">FoodScore</a>
+    <a class="navbar-brand" [routerLink]="['/restaurants']">{{ title }}</a>
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/restaurants']"
+          [routerLinkActive]="['active']"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Inicio
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/restaurants', 'add']"
+          [routerLinkActive]="['active']"
+        >
+          Nuevo restaurante
+        </a>
+      </li>
+    </ul>
   </div>
 </nav>
 
 <div class="container">
-  <restaurants-page></restaurants-page>
+  <router-outlet></router-outlet>
 </div>

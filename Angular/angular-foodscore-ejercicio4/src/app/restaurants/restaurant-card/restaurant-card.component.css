@@ -8,6 +8,10 @@
 .card-body {
   position: relative;
 
+  a {
+    text-decoration: none;
+  }
+
   .card-text {
     white-space: pre-wrap;
   }

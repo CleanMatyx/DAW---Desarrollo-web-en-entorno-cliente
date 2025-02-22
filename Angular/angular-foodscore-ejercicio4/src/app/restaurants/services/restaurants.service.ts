@@ -11,6 +11,9 @@ import { Restaurant } from '../interfaces/restaurant';
   providedIn: 'root',
 })
 export class RestaurantsService {
+  get(arg0: any) {
+    throw new Error('Method not implemented.');
+  }
   #http = inject(HttpClient);
 
   getAll() {

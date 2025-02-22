@@ -1,9 +1,11 @@
 import { Component, DestroyRef, inject, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EncodeBase64Directive } from '../directives/encode-base64.directive';
+import { EncodeBase64Directive } from '../../shared/directives/encode-base64.directive';
 import { Restaurant } from '../interfaces/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { CanComponentDeactivate } from '../../shared/guards/leave-page.guard';
 
 @Component({
   selector: 'restaurant-form',
@@ -11,20 +13,26 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './restaurant-form.component.html',
   styleUrl: './restaurant-form.component.css',
 })
-export class RestaurantFormComponent {
+export class RestaurantFormComponent implements CanComponentDeactivate{
+  newRestaurant: Restaurant = {
+    name: '',
+    description: '',
+    cuisine: '',
+    phone: '',
+    image: '',
+    daysOpen: [],
+  };
+
+  constructor() {}
   #restaurantsService = inject(RestaurantsService);
   #destroyRef = inject(DestroyRef);
+  #router = inject(Router);
 
   readonly days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
-  newRestaurant!: Restaurant;
   add = output<Restaurant>();
-  daysOpen!: boolean[];
-
+  daysOpen: boolean[] = [];
   filename = '';
-
-  constructor() {
-    this.resetForm();
-  }
+  saved = false;
 
   addRestaurant() {
     this.newRestaurant.daysOpen = this.daysOpen
@@ -35,20 +43,12 @@ export class RestaurantFormComponent {
       .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe((r) => {
         this.add.emit(r);
-        this.resetForm();
+        this.saved = true;
+        this.#router.navigate(['restaurants', r.id]);
       });
   }
 
-  resetForm() {
-    this.newRestaurant = {
-      name: '',
-      description: '',
-      cuisine: '',
-      image: '',
-      daysOpen: [],
-      phone: '',
-    };
-    this.filename = '';
-    this.daysOpen = new Array(7).fill(true);
+  canDeactivate() {
+    return this.saved || confirm('¿Quieres abandonar la página?. Los cambios se perderán...');
   }
 }
