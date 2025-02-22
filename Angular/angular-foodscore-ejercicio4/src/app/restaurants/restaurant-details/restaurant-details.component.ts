@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, input, numberAttribute, output } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, output } from '@angular/core';
 import { Router, RouterLink} from '@angular/router';
 import { Restaurant } from '../interfaces/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
@@ -8,8 +8,8 @@ import { Title } from '@angular/platform-browser';
 @Component({
   selector: 'restaurant-details',
   imports: [RouterLink],
-  templateUrl: '../restaurant-card/restaurant-card.component.html',
-  styleUrl: '../restaurant-card/restaurant-card.component.css',
+  templateUrl: './restaurant-details.component.html',
+  styleUrl: './restaurant-details.component.css',
 })
 export class RestaurantDetailsComponent {
   #restaurantsService = inject(RestaurantsService);
