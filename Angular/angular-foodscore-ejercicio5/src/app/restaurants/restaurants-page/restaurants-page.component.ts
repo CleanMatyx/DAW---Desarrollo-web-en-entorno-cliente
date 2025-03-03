@@ -1,0 +1,42 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { Restaurant } from '../interfaces/restaurant';
+import { RestaurantCardComponent } from '../restaurant-card/restaurant-card.component';
+import { RestaurantsService } from '../services/restaurants.service';
+
+@Component({
+  selector: 'restaurants-page',
+  imports: [FormsModule, RestaurantCardComponent],
+  templateUrl: './restaurants-page.component.html',
+  styleUrl: './restaurants-page.component.css',
+})
+export class RestaurantsPageComponent {
+  #restaurantsService = inject(RestaurantsService);
+
+  restaurantsResource = rxResource({
+    loader: () => this.#restaurantsService.getAll()
+  });
+  restaurants = computed(() => this.restaurantsResource.value() ?? []);
+  search = signal('');
+  onlyOpen = signal(false);
+  filteredRestaurants = computed(() => {
+    const searchLower = this.search().toLowerCase();
+    const filtered = this.restaurants().filter(
+      (r) =>
+        r.name.toLowerCase().includes(searchLower) ||
+        r.description.toLowerCase().includes(searchLower)
+    );
+
+    return this.onlyOpen()
+      ? filtered.filter((r) => r.daysOpen.includes(this.weekDay.toString()))
+      : filtered;
+  });
+  weekDay: number = new Date().getDay();
+
+  deleteRestaurant(restaurant: Restaurant) {
+    this.restaurantsResource.update((restaurants) =>
+      restaurants?.filter((r) => r !== restaurant)
+    );
+  }
+}
