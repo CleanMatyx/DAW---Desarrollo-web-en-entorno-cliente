@@ -3,7 +3,7 @@ import { toSignal } from "@angular/core/rxjs-interop";
 import { NgModel } from "@angular/forms";
 
 @Directive({
-  selector: '[validationClasses][ngModel]',
+  selector: '[validationClasses][ngModel],[validationClasses][formControl],[validationClasses][formControlName])',
   standalone: true,
   host: {
     '[class]': 'inputClass()',
