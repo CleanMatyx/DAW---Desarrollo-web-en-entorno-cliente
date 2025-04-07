@@ -42,7 +42,7 @@ export class LoadGoogleApiService {
 
     google.accounts.id.initialize({
       client_id: this.#clientId!,
-      callback: (response) => {
+      callback: (response: google.accounts.id.CredentialResponse) => {
         this.#credential$.next(response); // Se le llama cada vez que hay un login con Google
       },
     });

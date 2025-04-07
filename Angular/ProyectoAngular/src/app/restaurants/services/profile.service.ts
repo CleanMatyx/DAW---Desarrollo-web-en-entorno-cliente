@@ -9,6 +9,10 @@ import { SingleUserResponse } from '../interfaces/responses';
 })
 export class ProfileService {
   #http = inject(HttpClient);
+
+  addUser(user: User): Observable<User> {
+    
+  }
  
 
   getUser(id: number): Observable<User> {

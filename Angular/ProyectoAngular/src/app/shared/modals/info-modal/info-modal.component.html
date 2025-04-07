@@ -1,0 +1,26 @@
+<div class="modal-header">
+  <fa-icon
+    [icon]="icons[type].icon"
+    class="{{ icons[type].color }} fa-3x me-3 ms-2"
+  ></fa-icon>
+  <h4 class="modal-title">{{ title }}</h4>
+  <button
+    type="button"
+    class="btn-close me-3"
+    aria-label="Cerrar"
+    (click)="activeModal.dismiss()"
+  ></button>
+</div>
+<div class="modal-body">
+  <p class="text-center">{{ body }}</p>
+</div>
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-primary mx-auto"
+    aria-label="Aceptar"
+    (click)="activeModal.close()"
+  >
+    Aceptar
+  </button>
+</div>
