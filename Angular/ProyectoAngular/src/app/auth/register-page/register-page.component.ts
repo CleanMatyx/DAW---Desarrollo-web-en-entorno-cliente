@@ -10,13 +10,13 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { matchFields } from '../../validators/match-fields';
-import { GeolocateService } from '../../services/geolocate.service';
+import { GeolocateService } from '../../shared/services/geolocate.service';
 import { AuthService } from '../services/auth.service';
 import { UserRegister } from '../interfaces/auth';
-import { InfoModalComponent } from '../../modals/info-modal/info-modal.component';
+import { InfoModalComponent } from '../../shared/modals/info-modal/info-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CanComponentDeactivate } from '../../interfaces/can-component-deactivate';
-import { ConfirmModalComponent } from '../../modals/confirm-modal/confirm-modal.component';
+import { CanComponentDeactivate } from '../../shared/guards/leave-page.guard';
+import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'register-page',

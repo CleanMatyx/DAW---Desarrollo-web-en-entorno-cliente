@@ -12,6 +12,7 @@ import { Icons } from '../interfaces/icon';
   templateUrl: './confirm-modal.component.html',
   styleUrl: './confirm-modal.component.css'
 })
+
 export class ConfirmModalComponent {
   @Input() type!: string;
   @Input() title!: string;
