@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb821e73-16d0-41c1-bac3-c3217a2467b9" name="Changes" comment="" />
+    <list default="true" id="fb821e73-16d0-41c1-bac3-c3217a2467b9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/app/auth/login-page/login-page.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/auth/login-page/login-page.component.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,23 +35,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Implementación-de-TypeScript-a-proyecto-original-de-JavasCript&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/media/matias/Nvme 2.0/2DAMDAW/DAW - Desarrollo web en entorno cliente/Angular/ProyectoAngular&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;npm.Angular CLI Server.executor&quot;: &quot;Run&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/media/matias/Nvme 2.0/2DAMDAW/DAW - Desarrollo web en entorno cliente/Angular/ProyectoAngular/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Implementación-de-TypeScript-a-proyecto-original-de-JavasCript",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/matias/Desktop/Spring-Mvc",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "npm.Angular CLI Server.executor": "Run",
+    "ts.external.directory.path": "/media/matias/Nvme 2.0/2DAMDAW/DAW - Desarrollo web en entorno cliente/Angular/ProyectoAngular/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="npm.Angular CLI Server">
     <configuration name="Angular Application" type="JavascriptDebugType" uri="http://localhost:4200">
       <method v="2" />
@@ -84,6 +86,7 @@
       <workItem from="1743599279168" duration="528000" />
       <workItem from="1743603244754" duration="459000" />
       <workItem from="1743713566057" duration="278000" />
+      <workItem from="1744115212826" duration="23000" />
     </task>
     <servers />
   </component>

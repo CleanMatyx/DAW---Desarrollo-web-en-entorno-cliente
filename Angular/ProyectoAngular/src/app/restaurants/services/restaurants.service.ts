@@ -15,9 +15,9 @@ import { User } from '../interfaces/user';
 export class RestaurantsService {
   #http = inject(HttpClient);
 
-  getAll() {
+  getAll(params?: { [key: string]: string }) {
     return this.#http
-      .get<RestaurantsResponse>('restaurants')
+      .get<RestaurantsResponse>('restaurants', { params })
       .pipe(map((resp) => resp.restaurants));
   }
 

@@ -3,6 +3,7 @@ import { Restaurant } from '../interfaces/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { User } from '../interfaces/user';
 
 @Component({
   selector: 'restaurant-card',

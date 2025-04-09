@@ -2,6 +2,7 @@
   <div class="container-fluid">
     <a class="navbar-brand" routerLink="/">FoodScore</a>
     <ul class="navbar-nav me-auto">
+      @if(logged()) {
       <li class="nav-item">
         <a
           class="nav-link"
@@ -21,6 +22,46 @@
           Nuevo restaurante
         </a>
       </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/profile']"
+          [routerLinkActive]="['active']"
+        >
+          Perfil
+        </a>
+      </li>
+  } @else {
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/auth/login']"
+          [routerLinkActive]="['active']"
+        >
+          Iniciar sesión
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/auth/register']"
+          [routerLinkActive]="['active']"
+        >
+          Registrarse
+        </a>
+      </li>
+    }
+    @if(logged()) {
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [routerLink]="['/logout']"
+          [routerLinkActive]="['active']"
+        >
+          Cerrar sesión
+        </a>
+      </li>
+    }
     </ul>
   </div>
 </nav>

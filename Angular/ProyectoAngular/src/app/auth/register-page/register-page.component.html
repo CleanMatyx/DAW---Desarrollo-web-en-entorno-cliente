@@ -121,13 +121,13 @@
     <input
       type="file"
       class="form-control"
-      accept="image/*"
-      (change)="changeImage($event)"
-      id="image"
+      id="avatar"
       formControlName="avatar"
       [ngClass]="
-        validClasses(registerForm.controls.avatar, 'is-valid', 'is-invalid')
-      "
+          validClasses(registerForm.controls.lng, 'is-valid', 'is-invalid')
+        "
+      encodeBase64
+      (encoded)="imageBase64=$event"
     />
     @if (registerForm.controls.avatar.errors?.['required']) {
       <div class="invalid-feedback">

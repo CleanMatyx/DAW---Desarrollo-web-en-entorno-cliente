@@ -7,7 +7,6 @@ import { Icons } from '../interfaces/icon';
 
 @Component({
   selector: 'confirm-modal',
-  standalone: true,
   imports: [FontAwesomeModule],
   templateUrl: './confirm-modal.component.html',
   styleUrl: './confirm-modal.component.css'

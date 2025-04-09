@@ -1,5 +1,5 @@
 <form class="mt-4" [formGroup]="loginForm" (ngSubmit)="login()">
-  <legend>¡Bienvenido a SanviPop!</legend>
+  <legend>¡Bienvenido a FoodScore!</legend>
 
   <div class="mb-3">
     <label for="email">Email:</label>
@@ -39,23 +39,21 @@
   <button type="submit" class="btn btn-success" [disabled]="loginForm.invalid">
     Login
   </button>
-  <div googleLogin class="btn"></div> 
 </form>
 
-<button
-  fbLogin
-  [scopes]="['email', 'public_profile']"
-  class="btn btn-primary"
-  (loginOk)="loggedFacebook($event)"
-  (loginError)="showError($event)"
->
-  <fa-icon [icon]="['fab', 'facebook']" />
-  Login con Facebook
-</button>
-
-<div class="mt-2">
-  <a class="btn btn-primary" role="button" [routerLink]="['/auth/register']">
-    Crear cuenta
-  </a>
+<div>
+  <google-login class="btn" (login)="loggedGoogle($event)"></google-login>
 </div>
 
+<div>
+  <button
+    fbLogin
+    [scopes]="['email', 'public_profile']"
+    class="btn btn-primary ms-3"
+    (loginOk)="loggedFacebook($event)"
+    (loginError)="showError($event)"
+  >
+    <fa-icon [icon]="fbIcon"></fa-icon>
+    Login con Facebook
+  </button>
+</div>

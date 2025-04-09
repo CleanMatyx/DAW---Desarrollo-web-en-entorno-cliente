@@ -3,9 +3,11 @@
     <img class="card-img-top" [src]="restaurant().image" alt="" />
   </a>
   <div class="card-body">
+    @if(restaurant().mine) {
     <button class="btn btn-danger delete" (click)="deleteRestaurant()">
       <i class="bi bi-trash"></i>
     </button>
+  }
     <h4 class="card-title">
       <a [routerLink]="['/restaurants', restaurant().id]">
         {{ restaurant().name }}

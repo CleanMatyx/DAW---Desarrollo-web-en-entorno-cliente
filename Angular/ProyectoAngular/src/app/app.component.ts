@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../app/auth/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,4 +10,14 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'angular-foodscore';
+  isLoggedIn: boolean = false;
+  #router = inject(Router);
+  #authService = inject(AuthService);
+
+  logged = computed(() => this.#authService.logged());
+
+  logout() {
+    this.#authService.logout();
+    this.#router.navigate(['/auth/login']);
+  }
 }

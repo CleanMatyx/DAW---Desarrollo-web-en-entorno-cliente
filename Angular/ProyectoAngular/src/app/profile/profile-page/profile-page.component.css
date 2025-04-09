@@ -1,0 +1,14 @@
+#profile div:has(#photo) {
+    position: relative;
+    & > label {
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+    }
+}
+
+bm-map {
+  display: block;
+  height: 20rem;
+  width: 100%;
+}

@@ -9,7 +9,7 @@ export interface UserRegister {
     name: string;
     email: string;
     password: string;
-    photo: string;
+    avatar: string;
     lat: number;
     lng: number;
 }

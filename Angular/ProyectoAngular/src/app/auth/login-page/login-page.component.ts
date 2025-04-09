@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   NonNullableFormBuilder,
@@ -11,24 +11,25 @@ import { GeolocateService } from '../../shared/services/geolocate.service';
 import { AuthService } from '../services/auth.service';
 import { ExternalLogin, UserLogin } from '../interfaces/auth';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { InfoModalComponent } from '../../modals/info-modal/info-modal.component';
-import { LoadGoogleApiService } from '../google-login/load-google-api.service';
-import { GoogleLoginDirective } from '../google-login/google-login.directive';
+import { InfoModalComponent } from '../../shared/modals/info-modal/info-modal.component';
+import { LoadGoogleApiService } from '../../shared/google-login/load-google-api.service';
+import { GoogleLoginDirective } from '../../shared/google-login/google-login.directive';
 import { Subscription } from 'rxjs';
-import { FbLoginDirective } from '../facebook-login/fb-login.directive';
-import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FbLoginDirective } from '../../shared/fb-login/fb-login.directive';
 import { faFacebook } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TokenResponse } from '../interfaces/responses';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'login-page',
   standalone: true,
   imports: [
-    RouterLink,
     ReactiveFormsModule,
     NgClass,
     GoogleLoginDirective,
     FbLoginDirective,
-    FontAwesomeModule,
+    FontAwesomeModule
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.css',
@@ -39,11 +40,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   #geolocation = inject(GeolocateService);
   #modalService = inject(NgbModal);
   #loadGoogle = inject(LoadGoogleApiService);
-  #faIconLibrary = inject(FaIconLibrary);
-  #ngZone = inject(NgZone);
   #fb = inject(NonNullableFormBuilder);
+  #destroyRef = inject(DestroyRef);
 
   credentialsSub!: Subscription;
+  fbIcon = faFacebook;
+  userLogin!: UserLogin;
+  fbLogin!: TokenResponse;
+  googleLogin!: TokenResponse;
+
+  coordinates : [number,number] = [0,0]
 
   loginForm = this.#fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -54,50 +60,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.getGeolocation();
-    this.#faIconLibrary.addIcons(faFacebook);
-  }
-
-  ngOnInit(): void {
-    this.credentialsSub = this.#loadGoogle.credential$.subscribe((resp) => {
-      const login: ExternalLogin = {
-        token: resp.credential,
-        lat: +this.loginForm.value.lat!,
-        lng: +this.loginForm.value.lng!,
-      };
-
-      this.#authService.googleLogin(login).subscribe({
-        next: () => {
-          this.#ngZone.run(() => this.#router.navigate(['/products']));
-        },
-        error: () => console.error('Error logueando'),
-      });
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.credentialsSub.unsubscribe();
-  }
-
-  loggedFacebook(resp: fb.StatusResponse) {
-    // Send this to your server
-    console.log(resp.authResponse.accessToken);
-    const login: ExternalLogin = {
-      token: resp.authResponse.accessToken!,
-      lat: +this.loginForm.value.lat!,
-      lng: +this.loginForm.value.lng!,
-    };
-
-    this.#authService.facebookLogin(login).subscribe({
-      next: () => {
-        this.#ngZone.run(() => this.#router.navigate(['/products']));
-      },
-      error: () => console.error('Error logueando'),
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  showError(error: any) {
-    console.error(error);
   }
 
   async getGeolocation(): Promise<void> {
@@ -113,6 +75,66 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngOnInit(): void {
+    this.credentialsSub = this.#loadGoogle.credential$.subscribe((resp) => {
+      const login: ExternalLogin = {
+        token: resp.credential,
+        lat: +this.loginForm.value.lat!,
+        lng: +this.loginForm.value.lng!,
+      };
+
+      this.#authService.googleLogin(login).subscribe({
+        next: () => {
+          this.#router.navigate(['/restaurants']);
+        },
+        error: () => console.error('Error logueando'),
+      });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.credentialsSub.unsubscribe();
+  }
+
+  loggedFacebook(resp: fb.StatusResponse) {
+    // Envía esto a tu API
+    console.log(resp.authResponse.accessToken);
+    const login: ExternalLogin = {
+      token: resp.authResponse.accessToken!,
+      lat: +this.loginForm.value.lat!,
+      lng: +this.loginForm.value.lng!,
+    };
+
+    this.#authService.facebookLogin(login).subscribe({
+      next: () => {
+        this.#router.navigate(['/restaurants']);
+      },
+      error: () => console.error('Error logueando'),
+    });
+  }
+
+  loggedGoogle(resp: google.accounts.id.CredentialResponse) {
+    // Envia esto tu API
+    console.log(resp.credential);
+    const login: ExternalLogin = {
+      token: resp.credential,
+      lat: +this.loginForm.value.lat!,
+      lng: +this.loginForm.value.lng!,
+    };
+
+    this.#authService.googleLogin(login)
+    .pipe(takeUntilDestroyed(this.#destroyRef)).subscribe({
+      next: () => {
+        this.#router.navigate(['/restaurants']);
+      },
+      error: () => console.error('Error logueando'),
+    });
+  }
+
+  showError(error: any) {
+    console.error(error);
+  }
+
   login() {
     const login: UserLogin = {
       ...this.loginForm.getRawValue(),
@@ -122,7 +144,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
     this.#authService.login(login).subscribe({
       next: () => {
-        this.#router.navigate(['/products']);
+        this.#router.navigate(['/restaurants']);
       },
       error: () => {
         const modalRef = this.#modalService.open(InfoModalComponent);

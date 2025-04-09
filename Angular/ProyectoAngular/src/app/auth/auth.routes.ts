@@ -4,7 +4,7 @@ import { leavePageGuard } from '../shared/guards/leave-page.guard';
 export const authRoutes: Routes = [
   {
     path: 'login',
-    title: 'Login | Sanvipop',
+    title: 'Login | FoodScore',
     loadComponent: () =>
       import('./login-page/login-page.component').then(
         (m) => m.LoginPageComponent
@@ -12,7 +12,7 @@ export const authRoutes: Routes = [
   },
   {
     path: 'register',
-    title: 'Registro | Sanvipop',
+    title: 'Registro | FoodScore',
     canDeactivate: [leavePageGuard],
     loadComponent: () =>
       import('./register-page/register-page.component').then(

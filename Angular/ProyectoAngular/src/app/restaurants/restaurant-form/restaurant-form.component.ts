@@ -55,6 +55,9 @@ export class RestaurantFormComponent implements CanComponentDeactivate {
       image: '',
       daysOpen: [],
       phone: '',
+      address: '',
+      lat: 0,
+      lng: 0,
     };
     this.filename = '';
     this.daysOpen = new Array(7).fill(true);
