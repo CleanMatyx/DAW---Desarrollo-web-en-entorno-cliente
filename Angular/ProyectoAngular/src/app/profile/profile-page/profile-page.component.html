@@ -154,3 +154,14 @@
     </a>
   </button>
 </div>
+
+<div class="card">
+  <div class="card-body">
+    <ol-map [coordinates]="coordinates()">
+      <ga-autocomplete (locationChange)="changePlace($event)"></ga-autocomplete>
+      <ol-marker [coordinates]="coordinates()"></ol-marker>
+    </ol-map>
+  </div>
+</div>
+
+

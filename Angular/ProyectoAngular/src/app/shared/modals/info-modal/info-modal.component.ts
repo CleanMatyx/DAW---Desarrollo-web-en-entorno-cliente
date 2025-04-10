@@ -27,6 +27,10 @@ export class InfoModalComponent {
       icon: ['far', 'circle-check'],
     },
   };
+
+  get iconConfig() {
+    return this.icons[this.type] || { color: '', icon: ['', ''] };
+  }
   
   #faIconLibrary = inject(FaIconLibrary);
   activeModal = inject(NgbActiveModal);

@@ -18,7 +18,6 @@ import { CanComponentDeactivate } from '../../shared/guards/leave-page.guard';
 import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
 import { sameValue } from '../../shared/validators/same-value.validator';
 import { EncodeBase64Directive } from '../../shared/directives/encode-base64.directive';
-import { ValidationClassesDirective } from '../../shared/directives/validation-classes.directive';
 
 @Component({
   selector: 'register-page',

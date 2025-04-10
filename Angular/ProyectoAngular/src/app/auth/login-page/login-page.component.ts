@@ -20,6 +20,7 @@ import { faFacebook } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TokenResponse } from '../interfaces/responses';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'login-page',
@@ -68,7 +69,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       this.loginForm.controls.lat.setValue(geolocation.latitude + '');
       this.loginForm.controls.lng.setValue(geolocation.longitude + '');
     } catch (e) {
-      const modalRef = this.#modalService.open(InfoModalComponent);
+      const modalRef = this.#modalService.open(ConfirmModalComponent);
       modalRef.componentInstance.type = 'error';
       modalRef.componentInstance.title = 'Geolocalización denegada';
       modalRef.componentInstance.body = 'Se van a usar valores por defecto';
@@ -98,7 +99,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   loggedFacebook(resp: fb.StatusResponse) {
     // Envía esto a tu API
-    console.log(resp.authResponse.accessToken);
     const login: ExternalLogin = {
       token: resp.authResponse.accessToken!,
       lat: +this.loginForm.value.lat!,
@@ -115,7 +115,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   loggedGoogle(resp: google.accounts.id.CredentialResponse) {
     // Envia esto tu API
-    console.log(resp.credential);
     const login: ExternalLogin = {
       token: resp.credential,
       lat: +this.loginForm.value.lat!,
@@ -147,8 +146,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this.#router.navigate(['/restaurants']);
       },
       error: () => {
-        const modalRef = this.#modalService.open(InfoModalComponent);
-        modalRef.componentInstance.type = 'error';
+        const modalRef = this.#modalService.open(ConfirmModalComponent);
+        // modalRef.componentInstance.type = 'error';
         modalRef.componentInstance.title = 'Login incorrecto';
         modalRef.componentInstance.body =
           'El email o la contraseña son incorrectos';

@@ -71,7 +71,7 @@
   <div class="mb-3">
     <label for="phone">Teléfono</label>
     <input
-      type="number"
+      type="text"
       class="form-control"
       id="phone"
       name="phone"
@@ -109,6 +109,15 @@
   }
 
   <div>
-    <button type="submit" class="btn btn-primary" [disabled]="restForm.invalid">Crear</button>
+    <button type="submit" class="btn btn-primary" [disabled]="restForm.invalid || !addressLocation">{{ nameButton }}</button>
   </div>
 </form>
+
+<div class="card">
+  <div class="card-body">
+    <ol-map [coordinates]="coordinates()">
+      <ga-autocomplete (locationChange)="changePlace($event)"></ga-autocomplete>
+      <ol-marker [coordinates]="coordinates()"></ol-marker>
+    </ol-map>
+  </div>
+</div>

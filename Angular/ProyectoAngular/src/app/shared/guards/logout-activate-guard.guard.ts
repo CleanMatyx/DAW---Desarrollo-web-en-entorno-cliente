@@ -8,7 +8,7 @@ export const logoutActivateGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   return authService.isLogged().pipe(
     map((logged) => {
-      if (logged) return router.createUrlTree(['/products']);
+      if (logged) return router.createUrlTree(['/restaurants']);
       else return true;
     })
   );

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import {
   FaIconLibrary,
   FontAwesomeModule,
@@ -22,12 +22,17 @@ import {
   UserPhotoEdit,
   UserProfileEdit,
 } from '../interfaces/user';
-import { InfoModalComponent } from '../../shared/modals/info-modal/info-modal.component';
 import { ImageModalComponent } from '../../shared/modals/image-modal/image-modal.component';
 import { RouterLink } from '@angular/router';
 import { sameValue } from '../../shared/validators/same-value.validator';
 import { Coordinates } from '../../restaurants/interfaces/coordinates';
 import { MapService } from '../../shared/services/map.service';
+import { OlMapDirective } from '../../shared/ol-maps/ol-maps.directive.spec';
+import { SearchResult } from '../../shared/ol-maps/search-result';
+import { OlMarkerDirective } from '../../shared/ol-maps/ol-marker.directive';
+import { GaAutocompleteDirective } from '../../shared/ol-maps/ga-autocomplete.directive';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'profile-page',
@@ -37,7 +42,10 @@ import { MapService } from '../../shared/services/map.service';
     ReactiveFormsModule,
     NgClass,
     NgbModule,
-    RouterLink
+    RouterLink,
+    OlMapDirective,
+    OlMarkerDirective,
+    GaAutocompleteDirective
   ],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css',
@@ -49,10 +57,12 @@ export class ProfilePageComponent implements OnInit {
   #profilesServices = inject(ProfilesService);
   #fb = inject(NonNullableFormBuilder);
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   editProfile = signal(false);
   editPassword = signal(false);
   imageBase64 = '';
-  coordinates!: Coordinates;
+  coordinates = signal<[number, number]>([0, 0]);
 
   profileForm = this.#fb.group({
     name: ['', [Validators.required]],
@@ -71,13 +81,25 @@ export class ProfilePageComponent implements OnInit {
     ),
   });
 
+  userResource = rxResource({
+    request: () => null,
+    loader: () => this.#profilesServices.getMyProfile().pipe(
+      tap((user) => {
+        this.user = user;
+        this.coordinates.set([user.lng, user.lat]);
+        this.setProfileValues();
+      })
+    ),
+  });
+
+  changePlace(result: SearchResult) {
+    this.coordinates.set(result.coordinates);
+    console.log(result.address); // Habría que guardarlo
+  }
+
   ngOnInit(): void {
     this.#faIconLibrary.addIcons(faImage, faPenToSquare, faLock);
-    this.setProfileValues();
-    this.coordinates = {
-      latitude: this.user.lat,
-      longitude: this.user.lng,
-    };
+    this.userResource.reload(); // Cargar los datos del perfil al inicializar el componente
   }
 
   setProfileValues() {
@@ -106,15 +128,18 @@ export class ProfilePageComponent implements OnInit {
 
   async askUser() {
     const modalRef = this.#modalService.open(ConfirmModalComponent);
-    modalRef.componentInstance.type = 'question';
+    modalRef.componentInstance.type = 'error';
+    modalRef.componentInstance.icon = ['fas', 'circle-xmark'];
     modalRef.componentInstance.title = '¿Estás seguro de cancelar?';
     modalRef.componentInstance.body = 'Los cambios no se guardarán';
     return await modalRef.result.catch(() => false);
   }
 
   successModal(title: string) {
-    const modalRef = this.#modalService.open(InfoModalComponent);
+    const modalRef = this.#modalService.open(ConfirmModalComponent);
     modalRef.componentInstance.type = 'success';
+    modalRef.componentInstance.icon = ['far', 'circle-check'];
+    modalRef.componentInstance.color = 'text-success';
     modalRef.componentInstance.title = title;
     modalRef.componentInstance.body = 'Se han guardado los cambios';
   }
@@ -160,14 +185,14 @@ export class ProfilePageComponent implements OnInit {
 
       this.#profilesServices.updatePhoto(photo).subscribe({
         next: () => {
-          this.#profilesServices
-            .getMyProfile()
-            .subscribe((u) => (this.user = u));
+          this.#profilesServices.getMyProfile().subscribe((u) => {
+            this.user = u;
+            this.cdr.detectChanges(); // Forzar la detección de cambios
+          });
           this.successModal('Avatar cambiado');
         },
         error: () => {
-          const modalRef = this.#modalService.open(InfoModalComponent);
-          modalRef.componentInstance.type = 'error';
+          const modalRef = this.#modalService.open(ConfirmModalComponent);
           modalRef.componentInstance.title = 'Error cambiando el avatar';
           modalRef.componentInstance.body =
             'El avatar seleccionado ocupa demasiado tamaño';

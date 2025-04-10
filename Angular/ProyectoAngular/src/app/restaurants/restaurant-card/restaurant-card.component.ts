@@ -4,6 +4,8 @@ import { RestaurantsService } from '../services/restaurants.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { User } from '../interfaces/user';
+import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'restaurant-card',
@@ -14,6 +16,7 @@ import { User } from '../interfaces/user';
 export class RestaurantCardComponent {
   #restaurantsService = inject(RestaurantsService);
   #destroyRef = inject(DestroyRef);
+  #modalRef = inject(NgbModal);
 
   weekDay: number = new Date().getDay();
   readonly days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
@@ -26,11 +29,24 @@ export class RestaurantCardComponent {
   }
 
   deleteRestaurant() {
-    if(confirm("Seguro que quieres borrar el restaurante?")) {
-      this.#restaurantsService
-        .delete(this.restaurant().id!)
-        .pipe(takeUntilDestroyed(this.#destroyRef))
-        .subscribe(() => this.deleted.emit());
-    }
+    const modalRef = this.#modalRef.open(ConfirmModalComponent);
+    modalRef.componentInstance.title = 'Eliminar Restaurante';
+    modalRef.componentInstance.message = `¿Estás seguro de que deseas eliminar el restaurante ${this.restaurant().name}?`;
+    modalRef.componentInstance.body = 'Esta acción no se puede deshacer.';
+    modalRef.result.then((result) => {
+      if(result) {
+        this.#restaurantsService
+          .delete(this.restaurant().id!)
+          .pipe(takeUntilDestroyed(this.#destroyRef))
+          .subscribe(() => this.deleted.emit());
+          modalRef.close();
+      } else {
+        modalRef.dismiss();
+      }
+    });
+  }
+  
+  getCreatorName(creator: User) {
+    return creator.name;
   }
 }

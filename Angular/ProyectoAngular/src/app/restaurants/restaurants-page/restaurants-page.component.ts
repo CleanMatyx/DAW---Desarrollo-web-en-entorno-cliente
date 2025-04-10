@@ -11,7 +11,10 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'restaurants-page',
-  imports: [FormsModule, RestaurantCardComponent],
+  imports: [
+    FormsModule, 
+    RestaurantCardComponent
+  ],
   templateUrl: './restaurants-page.component.html',
   styleUrl: './restaurants-page.component.css',
 })

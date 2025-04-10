@@ -8,7 +8,10 @@ import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'restaurant-details',
-  imports: [RestaurantCardComponent, RouterLink],
+  imports: [
+    RestaurantCardComponent, 
+    RouterLink
+  ],
   templateUrl: './restaurant-details.component.html',
   styleUrl: './restaurant-details.component.css',
 })

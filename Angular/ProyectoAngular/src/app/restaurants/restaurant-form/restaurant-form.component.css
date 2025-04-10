@@ -1,0 +1,11 @@
+bm-map {
+    display: block;
+    height: 20rem;
+    width: 100%;
+  }
+  
+  ol-map {
+    display: block;
+    width: 100%;
+    height: 300px;
+  }
