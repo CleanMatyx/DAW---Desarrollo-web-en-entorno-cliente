@@ -1,0 +1,72 @@
+<form class="mt-4" #loginForm="ngForm" (ngSubmit)="login()">
+  <legend>Welcome to FoodScore!</legend>
+
+  <div class="mb-3">
+    <label for="email">Email:</label>
+    <input
+      type="email"
+      class="form-control"
+      name="email"
+      id="email"
+      placeholder="Email"
+      required
+      email
+      [(ngModel)]="userLogin.email"
+      #emailModel="ngModel"
+      [validationClasses]="{ valid: 'is-valid', invalid: 'is-invalid' }"
+    />
+    @if(emailModel.errors?.['required']) {
+    <div class="invalid-feedback">El email es obligatorio</div>
+    } @if(emailModel.errors?.['email']) {
+    <div class="invalid-feedback">
+      El email debe de tener un formato correcto
+    </div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="password">Contraseña:</label>
+    <input
+      type="password"
+      class="form-control"
+      name="password"
+      id="password"
+      placeholder="Password"
+      required
+      [(ngModel)]="userLogin.password"
+      minlength="4"
+      #passwordModel="ngModel"
+      [validationClasses]="{ valid: 'is-valid', invalid: 'is-invalid' }"
+    />
+    @if(passwordModel.errors?.['required']) {
+    <div class="invalid-feedback">El password es obligatorio</div>
+    } @if(passwordModel.errors?.['minlength']) {
+    <div class="invalid-feedback">
+      El password debe de ser almenos 4 caracteres
+    </div>
+    }
+  </div>
+  <a class="btn btn-secondary" role="button" [routerLink]="['/auth', 'register']"
+    >Crear cuenta</a
+  >
+  <button
+    type="submit"
+    class="btn btn-primary mx-3"
+    [disabled]="loginForm.invalid"
+  >
+    Login
+  </button>
+  <div class="mt-2">
+    <googleLogin class="btn ps-0" (login)="loggedGoogle($event)"></googleLogin>
+
+    <a
+      fbLogin
+      [scopes]="['email', 'public_profile']"
+      class="btn btn-primary"
+      (loginOk)="loggedFacebook($event)"
+      (loginError)="showError($event)"
+    >
+      <fa-icon [icon]="iconFacebook"></fa-icon>
+      Login con Facebook
+  </a>
+  </div>
+</form>

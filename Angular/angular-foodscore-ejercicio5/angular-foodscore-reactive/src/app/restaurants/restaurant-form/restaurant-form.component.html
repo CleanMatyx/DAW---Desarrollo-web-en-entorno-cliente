@@ -1,0 +1,132 @@
+<form class="mt-4" (ngSubmit)="addRestaurant()" [formGroup]="restForm">
+  <div class="mb-3">
+    <label for="name">Nombre</label>
+    <input
+      type="text"
+      class="form-control"
+      id="name"
+      placeholder="Enter name"
+      formControlName="name"
+      [validationClasses]="{valid: 'is-valid', invalid: 'is-invalid'}"
+    />
+
+    @let nameErrors = restForm.get('name')?.errors;
+    @if(nameErrors?.['required']){
+      <div class="invalid-feedback">Name cannot be empty</div>
+    }
+    @if(nameErrors?.['minlength']) {
+      <div class="invalid-feedback">
+        You must enter at least
+        {{nameErrors?.['minlength'].requiredLength - nameErrors?.['minlength'].actualLength}}
+        characters more
+      </div>
+    }
+    @if(nameErrors?.['pattern']){
+      <div class="invalid-feedback">The Restaurant's name must contain only letters or spaces</div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="description">Descripción</label>
+    <textarea
+      class="form-control"
+      id="description"
+      rows="3"
+      placeholder="Description"
+      formControlName="description"
+      [validationClasses]="{valid: 'is-valid', invalid: 'is-invalid'}"
+    ></textarea>
+
+    @let descriptionErrors = restForm.get('description')?.errors;
+    @if(descriptionErrors?.['required']){
+      <div class="invalid-feedback">Description cannot be empty</div>
+    }
+    @if(descriptionErrors?.['minlenght']) {
+      <div class="invalid-feedback">
+        You must enter at least 
+        {{descriptionErrors?.['minleght'].requiredLength - descriptionErrors?.['minlength'].actualLength}}
+        characters more
+      </div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="cuisine">Cocina</label>
+    <input
+      type="text"
+      class="form-control"
+      id="cuisine"
+      placeholder="Cuisine"
+      formControlName="cuisine"
+      [validationClasses]="{valid: 'is-valid', invalid: 'is-invalid'}"
+    />
+    @let cuisineErrors = restForm.get('cuisine')?.errors;
+    @if(cuisineErrors?.['required']){
+      <div class="invalid-feedback">Cuicine's type cannot be empty</div>
+    }
+    @if(cuisineErrors?.['minlength']) {
+      <div class="invalid-feedback">
+        You must enter al least
+        {{cuisineErrors?.['minlength'].requiredLength - cuisineErrors?.['minlength'].actualLength}}
+        characters more
+      </div>
+    }
+  </div>
+  <p>Días de apertura</p>
+  <div class="mb-3" formArrayName="daysOpen" oneChecked>
+    @for(day of days; track $index; let i = $index) {
+    <div class="form-check form-check-inline">
+      <input
+        type="checkbox"
+        class="custom-control-input"
+        [formControlName]="i"
+        id="checkDay{{i}}"
+      />
+      <label class="custom-control-label ms-2" for="checkDay{{ i }}">{{day}}</label>
+    </div>
+    }
+    @if(restForm.controls.daysOpen.invalid){
+      <div class="text-danger">You must select at least one day</div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="phone">Teléfono</label>
+    <input
+      type="number"
+      class="form-control"
+      id="phone"
+      name="phone"
+      placeholder="Phone number"
+      formControlName="phone"
+      [validationClasses]="{valid: 'is-valid', invalid: 'is-invalid'}"
+    />
+    @let phoneErrors = restForm.get('phone')?.errors;
+    @if(phoneErrors?.['required']){
+      <div class="invalid-feedback">The Restaurant's phone is mandatory</div>
+    }
+    @if(phoneErrors?.['pattern']){
+      <div class="invalid-feedback">The Restaurant's telephone number must have at least 9 numbers without a prefix</div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="image">Main photo</label>
+    <input
+      type="file"
+      class="form-control"
+      id="image"
+      formControlName="image"
+      [validationClasses]="{valid: 'is-valid', invalid: 'is-invalid'}"
+      encodeBase64
+      (encoded)="filename=$event"
+    />
+    @let imageErrors = restForm.get('image')?.errors;
+    @if(imageErrors?.['required']){
+      <div class="invalid-feedback">The Restaurant's image is mandatory</div>
+    }
+  </div>
+  @if(newRestaurant.image) {
+    <img [src]="newRestaurant.image" alt="" id="imgPreview" class="img-thumbnail mb-3" />
+  }
+
+  <div>
+    <button type="submit" class="btn btn-primary" [disabled]="restForm.invalid">Crear</button>
+  </div>
+</form>

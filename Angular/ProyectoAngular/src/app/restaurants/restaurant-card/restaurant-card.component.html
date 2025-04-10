@@ -1,0 +1,43 @@
+<div class="card h-100 shadow">
+  <a [routerLink]="['/restaurants', restaurant().id]">
+    <img class="card-img-top" [src]="restaurant().image" alt="" />
+  </a>
+  <div class="card-body">
+    @if(restaurant().mine) {
+      <button class="btn btn-danger delete" (click)="deleteRestaurant()">
+        <i class="bi bi-trash"></i>
+      </button>
+    }
+    <h4 class="card-title">
+      <a [routerLink]="['/restaurants', restaurant().id]">
+        {{ restaurant().name }}
+      </a>
+    </h4>
+    <p class="card-text">{{ restaurant().description }}</p>
+    <div class="card-text">
+      <small class="text-muted">
+        <strong>Días: </strong> {{ getOpenDayNames(restaurant().daysOpen) }}
+      </small>
+      @if(restaurant().daysOpen.includes('' + weekDay)) {
+      <span class="badge ms-2 bg-success">Abierto</span>
+      } @else {
+      <span class="badge ms-2 bg-danger">Cerrado</span>
+      }
+    </div>
+    <div class="card-text">
+      <small class="text-muted phone">
+        <strong>Teléfono: </strong> {{ restaurant().phone }}
+      </small>
+    </div>
+  </div>
+  <div class="card-footer">
+    <small class="text-muted">{{ restaurant().cuisine }}</small>
+    @if(restaurant().mine) {
+      <button
+        class="btn btn-primary edit float-end"
+        [routerLink]="['/restaurants/edit', restaurant().id]">
+        <i class="bi bi-pencil-square"></i>
+      </button>
+    }
+  </div>
+</div>

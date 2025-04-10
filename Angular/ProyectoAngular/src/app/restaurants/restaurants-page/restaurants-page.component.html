@@ -1,0 +1,54 @@
+<nav class="navbar navbar-light bg-light justify-content-between mt-3">
+  <div class="col-auto ms-3">
+    <input
+  type="checkbox"
+  class="btn-check"
+  id="show-open"
+  [ngModel]="onlyOpen()"
+  (ngModelChange)="onOnlyOpenChange($event)"
+/>
+<label class="btn btn-outline-primary" for="show-open">Show open</label>
+  </div>
+  <form class="container-fluid mb-0 col">
+    <input
+      class="form-control"
+      type="text"
+      name="search"
+      placeholder="Filtrar"
+      aria-label="Search"
+      [(ngModel)]="search"
+    />
+  </form>
+</nav>
+
+<!-- Texto que muestra los filtros activos (por ejemplo, el usuario creador y otros filtros) -->
+<div class="container mt-2">
+  @if(userName()) {
+  <small class="text-muted">
+    Restaurantes creados por: {{ userName() }}. </small>
+  }
+  @if(search()) {
+  <small class="text-muted">Filtrados por: {{ search() }}. </small>
+  }
+  @if(onlyOpen()) {
+  <small class="text-muted">Solo abiertos hoy</small>
+  }
+</div>
+
+<div
+  id="placesContainer"
+  class="mb-4 mt-3 row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"
+>
+  @for (restaurant of restaurants(); track restaurant.id) {
+  <restaurant-card
+    [restaurant]="restaurant"
+    (deleted)="deleteRestaurant(restaurant)"
+    class="col"
+  >
+  </restaurant-card>
+  }
+</div>
+
+<div class="d-grid mt-4">
+  <button class="btn btn-primary" (click)="loadNextPage()">Cargar más</button>
+</div>

@@ -1,0 +1,59 @@
+<form class="mt-4" [formGroup]="loginForm" (ngSubmit)="login()">
+  <legend>¡Bienvenido a FoodScore!</legend>
+
+  <div class="mb-3">
+    <label for="email">Email:</label>
+    <input
+      type="email"
+      class="form-control"
+      id="email"
+      placeholder="Email"
+      formControlName="email"
+      [ngClass]="
+        validClasses(loginForm.controls.email, 'is-valid', 'is-invalid')
+      "
+    />
+    @if (loginForm.controls.email.errors?.['required']) {
+      <div class="invalid-feedback">El email no puede estar vacío</div>
+    }
+    @if (loginForm.controls.email.errors?.['email']) {
+      <div class="invalid-feedback">Debes introducir un email válido</div>
+    }
+  </div>
+  <div class="mb-3">
+    <label for="password">Contraseña:</label>
+    <input
+      type="password"
+      class="form-control"
+      id="password"
+      placeholder="Contraseña"
+      formControlName="password"
+      [ngClass]="
+        validClasses(loginForm.controls.password, 'is-valid', 'is-invalid')
+      "
+    />
+    @if (loginForm.controls.password.errors?.['required']) {
+      <div class="invalid-feedback">La contraseña no puede estar vacía</div>
+    }
+  </div>
+  <button type="submit" class="btn btn-success" [disabled]="loginForm.invalid">
+    Login
+  </button>
+</form>
+
+<div>
+  <google-login class="btn" (login)="loggedGoogle($event)"></google-login>
+</div>
+
+<div>
+  <button
+    fbLogin
+    [scopes]="['email', 'public_profile']"
+    class="btn btn-primary ms-3"
+    (loginOk)="loggedFacebook($event)"
+    (loginError)="showError($event)"
+  >
+    <fa-icon [icon]="fbIcon"></fa-icon>
+    Login con Facebook
+  </button>
+</div>
