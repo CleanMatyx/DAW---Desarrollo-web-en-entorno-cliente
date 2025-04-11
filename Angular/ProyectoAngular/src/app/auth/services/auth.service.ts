@@ -17,6 +17,7 @@ export class AuthService {
   get logged() {
     return this.#logged.asReadonly();
   }
+  
 
   login(data: UserLogin): Observable<void> {
     return this.#http.post<TokenResponse>(`auth/login`, data).pipe(
@@ -30,59 +31,29 @@ export class AuthService {
   logout(): void {
     this.#logged.set(false);
     localStorage.removeItem('token');
-    
     this.#router.navigate(['/login']); // Redirige al usuario a la página de inicio de sesión
   }
 
-  // isLogged(): Observable<boolean> {
-  //   if (this.logged()) {
-  //     return of(true);
-  //   } else {
-  //     if (!localStorage.getItem('token')) {
-  //       return of(false);
-  //     } else {
-  //       return this.#http.get<void>(`auth/validate`).pipe(
-  //         map(() => {
-  //           this.#logged.set(true);
-  //           return true;
-  //         }),
-  //         catchError(() => {
-  //           localStorage.removeItem('token'); // Eliminar token no válido
-  //           this.#logged.set(false);
-  //           return of(false);
-  //         })
-  //       );
-  //     }
-  //   }
-  // }
-
   isLogged(): Observable<boolean> {
-    if(!this.logged() && !localStorage.getItem('token')) {
-      console.log('No token found');
-      this.#logged.set(false);
-      this.#router.navigate(['/login']);
-      return of(false);
-    } else if (this.logged()) {
-      console.log('User is already logged in');
+    if (this.logged()) {
       return of(true);
-    } else if (localStorage.getItem('token') && !this.logged()) {
-      console.log('Token found, validating...');
-      return this.#http.get<void>(`auth/validate`).pipe(
-        map(() => {
-          this.#logged.set(true);
-          console.log('Token is valid');
-          return true;
-        }),
-        catchError(() => {
-          console.log('Token is invalid');
-          localStorage.removeItem('token'); // Eliminar token no válido
-          this.#router.navigate(['/login']); // Redirige al usuario a la página de inicio de sesión
-          this.#logged.set(false);
-          return of(false);
-        })
-      );
+    } else {
+      if (!localStorage.getItem('token')) {
+        return of(false);
+      } else {
+        return this.#http.get<void>(`auth/validate`).pipe(
+          map(() => {
+            this.#logged.set(true);
+            return true;
+          }),
+          catchError(() => {
+            localStorage.removeItem('token'); // Eliminar token no válido
+            this.#logged.set(false);
+            return of(false);
+          })
+        );
+      }
     }
-    return of(false);
   }
 
   register(data: UserRegister): Observable<void> {
@@ -107,5 +78,24 @@ export class AuthService {
           this.#logged.set(true);
         })
       );
+  }
+
+  // Método para navegar al perfil del usuario actual
+  navigateToMyProfile(): void {
+    this.#router.navigate(['/profile']);
+  }
+
+  // Método para obtener el ID del usuario actual y navegar a su perfil
+  getCurrentUserIdAndNavigateToProfile(): void {
+    this.#http.get<{user: {id: number}}>(`auth/profile`).subscribe({
+      next: (response) => {
+        const userId = response.user.id;
+        this.#router.navigate(['/profile', userId]);
+      },
+      error: () => {
+        // Si hay un error, navegar a la ruta general de perfil
+        this.#router.navigate(['/profile']);
+      }
+    });
   }
 }

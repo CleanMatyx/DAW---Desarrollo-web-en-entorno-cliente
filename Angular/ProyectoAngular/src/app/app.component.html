@@ -51,18 +51,22 @@
         </a>
       </li>
     }
-    @if(logged()) {
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          [routerLink]="['/logout']"
-          [routerLinkActive]="['active']"
-        >
-          Cerrar sesión
-        </a>
-      </li>
-    }
     </ul>
+    <ul class="navbar-nav ms-auto">
+      @if(logged()) {
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            (click)="logout()"
+            role="button"
+            style="cursor: pointer;"
+          >
+            Cerrar sesión
+          </a>
+        </li>
+      }
+    </ul>
+    
   </div>
 </nav>
 

@@ -18,7 +18,5 @@ export class AppComponent {
 
   logout() {
     this.#authService.logout();
-    this.isLoggedIn = false; // Asegura que el estado local se actualice correctamente
-    this.#router.navigate(['/auth/login']); // Redirige al usuario a la página de inicio de sesión
   }
 }

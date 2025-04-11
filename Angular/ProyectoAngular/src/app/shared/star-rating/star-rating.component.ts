@@ -16,4 +16,21 @@ export class StarRatingComponent {
   starEmpty = faStarEmpty;
   starFull = faStarFull;
 
+  public getStars(): string {
+    return this.generateStars(this.rating());
+  }
+
+  public generateStars(rating: number): string {
+    const fullStar = '<i class="bi bi-star-fill"></i>';
+    const emptyStar = '<i class="bi bi-star"></i>';
+    const maxStars = 5;
+    let stars = '';
+
+    for (let i = 0; i < maxStars; i++) {
+        stars += i < rating ? fullStar : emptyStar;
+    }
+
+    return `${stars} ${rating.toFixed(2)}`;
+}
+
 }

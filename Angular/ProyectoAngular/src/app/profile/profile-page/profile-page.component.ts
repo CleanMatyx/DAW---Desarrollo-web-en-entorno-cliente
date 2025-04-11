@@ -1,4 +1,13 @@
-import { Component, Input, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { 
+  Component, 
+  Input, 
+  OnInit, 
+  inject, 
+  signal, 
+  ChangeDetectorRef, 
+  input, 
+  numberAttribute 
+} from '@angular/core';
 import {
   FaIconLibrary,
   FontAwesomeModule,
@@ -13,7 +22,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { 
+  NgbModal, 
+  NgbModule 
+} from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
 import { ProfilesService } from '../services/profiles.service';
 import {
@@ -30,7 +42,6 @@ import { MapService } from '../../shared/services/map.service';
 import { OlMapDirective } from '../../shared/ol-maps/ol-maps.directive.spec';
 import { SearchResult } from '../../shared/ol-maps/search-result';
 import { OlMarkerDirective } from '../../shared/ol-maps/ol-marker.directive';
-import { GaAutocompleteDirective } from '../../shared/ol-maps/ga-autocomplete.directive';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
 
@@ -45,7 +56,6 @@ import { tap } from 'rxjs';
     RouterLink,
     OlMapDirective,
     OlMarkerDirective,
-    GaAutocompleteDirective
   ],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css',
@@ -63,6 +73,7 @@ export class ProfilePageComponent implements OnInit {
   editPassword = signal(false);
   imageBase64 = '';
   coordinates = signal<[number, number]>([0, 0]);
+  id = input({ transform: numberAttribute });
 
   profileForm = this.#fb.group({
     name: ['', [Validators.required]],
@@ -82,14 +93,32 @@ export class ProfilePageComponent implements OnInit {
   });
 
   userResource = rxResource({
-    request: () => null,
-    loader: () => this.#profilesServices.getMyProfile().pipe(
-      tap((user) => {
-        this.user = user;
-        this.coordinates.set([user.lng, user.lat]);
-        this.setProfileValues();
-      })
-    ),
+    request: () => this.id(),
+    loader: ({request: id}) => {
+      // Si no se proporciona un id en la URL o es 0, cargar el perfil del usuario actual
+      if (!id) {
+        return this.#profilesServices.getMyProfile().pipe(
+          tap((user) => {
+            console.log('usuario obtenido del usuario actual');
+            console.log(user);
+            this.user = user;
+            this.coordinates.set([user.lng, user.lat]);
+            this.setProfileValues();
+          })
+        );
+      } else {
+        // Si se proporciona un id, cargar el perfil del usuario especificado
+        return this.#profilesServices.getProfile(Number(id)).pipe(
+          tap((user) => {
+            console.log('usuario obtenido del id');
+            console.log(user);
+            this.user = user;
+            this.coordinates.set([user.lng, user.lat]);
+            this.setProfileValues();
+          })
+        );
+      }
+    },
   });
 
   changePlace(result: SearchResult) {
@@ -99,7 +128,16 @@ export class ProfilePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.#faIconLibrary.addIcons(faImage, faPenToSquare, faLock);
-    this.userResource.reload(); // Cargar los datos del perfil al inicializar el componente
+    
+    if (!this.id()) {
+      this.#profilesServices.getMyProfile().subscribe(user => {
+        this.user = user;
+        this.coordinates.set([user.lng, user.lat]);
+        this.setProfileValues();
+      });
+    } else {
+      this.userResource.reload();
+    }
   }
 
   setProfileValues() {

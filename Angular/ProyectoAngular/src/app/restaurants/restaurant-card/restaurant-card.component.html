@@ -7,6 +7,11 @@
       <button class="btn btn-danger delete" (click)="deleteRestaurant()">
         <i class="bi bi-trash"></i>
       </button>
+      <button
+        class="btn btn-primary edit float-end"
+        [routerLink]="['/restaurants/edit', restaurant().id]">
+        <i class="bi bi-pencil-square"></i>
+      </button>
     }
     <h4 class="card-title">
       <a [routerLink]="['/restaurants', restaurant().id]">
@@ -29,15 +34,25 @@
         <strong>Teléfono: </strong> {{ restaurant().phone }}
       </small>
     </div>
+    <div>
+      <small class="text-muted stars">
+        <span class="align-middle">
+          <star-rating
+            [rating]="restaurant().stars!"
+            (ratingChange)="changeRating($event)"
+          ></star-rating>
+        {{getStars(restaurant())}} / 5
+      </span>
+      </small>
+    </div>
   </div>
   <div class="card-footer">
     <small class="text-muted">{{ restaurant().cuisine }}</small>
+    <small class="text-muted float-end">
+      {{ getDistance(restaurant()) }} km
+    </small>
     @if(restaurant().mine) {
-      <button
-        class="btn btn-primary edit float-end"
-        [routerLink]="['/restaurants/edit', restaurant().id]">
-        <i class="bi bi-pencil-square"></i>
-      </button>
+      
     }
   </div>
 </div>

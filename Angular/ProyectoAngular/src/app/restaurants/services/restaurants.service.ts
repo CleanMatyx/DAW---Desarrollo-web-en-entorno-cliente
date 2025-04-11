@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import {
+  CommentsResponse,
   RestaurantsResponse,
   SingleRestaurantResponse,
 } from '../interfaces/responses';
@@ -49,6 +50,12 @@ export class RestaurantsService {
     return this.#http
       .post<SingleRestaurantResponse>(`restaurants/${restaurant.id}/comments`, comment)
       .pipe(map((resp) => resp.restaurant));
+  }
+
+  getComments(restaurantId: number) {
+    return this.#http
+      .get<CommentsResponse>(`restaurants/${restaurantId}/comments`)
+      .pipe(map((resp) => resp.comments));
   }
 
   delete(id: number) {

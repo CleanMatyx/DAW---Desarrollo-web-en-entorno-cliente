@@ -16,6 +16,13 @@ export const restRoutes: Routes = [
     canDeactivate: [leavePageGuard]
   },
   {
+    path: 'edit/:id',
+    loadComponent: () => import('./restaurant-form/restaurant-form.component').then(m => m.RestaurantFormComponent),
+    title: 'Editar Restaurante | FoodScore',
+    canDeactivate: [leavePageGuard],
+    canActivate: [numericIdGuard]
+  },
+  {
     path: ':id',
     loadComponent: () => import('./restaurant-details/restaurant-details.component').then(m => m.RestaurantDetailsComponent),
     canActivate: [numericIdGuard]

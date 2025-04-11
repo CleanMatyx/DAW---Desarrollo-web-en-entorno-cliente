@@ -1,7 +1,114 @@
-<div class="mt-4">
+<div class="container mt-4">
   @if(restaurantResource.hasValue()) {
     @let restaurant = restaurantResource.value()!;
     <restaurant-card [restaurant]="restaurant" (deleted)="goBack()"></restaurant-card>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        {{ restaurant.address }}
+      </div>
+      <div class="card-body">
+        <ol-map [coordinates]="coordinates()">
+          <ol-marker [coordinates]="coordinates()"></ol-marker>
+        </ol-map>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header bg-danger text-white">Creador</div>
+      <div class="card-body d-flex flex-row">
+      <div>
+        <a [routerLink]="['/profile', creator.id]">
+        <img class="rounded-circle me-3" style="width: 50px;" src="" alt="" [src]="creator.avatar"/>
+        </a>
+      </div>
+      <div>
+        <a [routerLink]="['/profile', creator.id]" class="text-decoration-none text-dark">
+        <div><strong>{{ creator.name }}</strong></div>
+        </a>
+        <div><small>{{ creator.email }}</small></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="card mt-4 mb-4">
+      <div class="card-header bg-secondary text-white">Comentarios</div>
+      <ul class="list-group" id="comments">
+      @for(comment of comments(); track comment.id) {
+        <li class="list-group-item">
+        <div class="d-flex flex-row">
+          <div>
+          <a [routerLink]="['/profile', comment.user?.id]">
+            <img class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;" src="" alt="" [src]="comment.user?.avatar"/>
+          </a>
+          </div>
+          <div>
+          <a [routerLink]="['/profile', comment.user?.id]" class="text-decoration-none text-dark">
+            <div><strong>{{ comment.user?.name }}</strong></div>
+          </a>
+          <div><small>{{ comment.user?.email }}</small></div>
+          </div>
+        </div>
+        <star-rating [rating]="comment.stars"></star-rating>
+        <p class="mt-2">{{ comment.text }}</p>
+        <p class="mt-2 text-end">
+          <span class="badge ms-2 bg-danger">{{ comment.date | date: 'dd/MM/yyyy' }}</span>
+        </p>
+        </li>
+      }
+      </ul>
+    </div>
+    <div class="card mt-4 mb-4">
+      @if(restaurant.commented) {
+        <div class="card-header bg-secondary text-white">Ya has realizado un comentario en {{restaurant.name}} </div>
+        <div class="card-body">
+          <p>Muchas gracias por tu comentario!</p>
+        </div>
+      } @else {
+        <div class="card-header bg-secondary text-white">Escribe tu comentario de {{restaurant.name}}</div>
+        <form [formGroup]="commentForm">
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="name">Comentario:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="comment"
+                placeholder="Ingresa tu comentario"
+                formControlName="comment"
+                [ngClass]="
+                  validClasses(commentForm.controls.comment, 'is-valid', 'is-invalid')
+                "
+              />
+              @if (commentForm.controls.comment.errors?.['required']) {
+                <div class="invalid-feedback">El comentario no puede estar vacío</div>
+              }
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="stars">Puntuación:</label>
+              <star-rating
+                id="stars"
+                [rating]="rating"
+                (ratingChange)="changeRating($event)"
+              ></star-rating>
+            </div>
+            <div class="mb-3">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="addComment()"
+                [disabled]="commentForm.invalid"
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        </form>
+      }
+    </div>
   } @else {
     <p>Cargando datos del restaurante...</p>
   }
@@ -9,3 +116,5 @@
 <div class="mt-4 mb-4">
   <a class="btn btn-success" [routerLink]="['/restaurants']">Volver</a>
 </div>
+
+

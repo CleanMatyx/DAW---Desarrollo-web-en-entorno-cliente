@@ -9,6 +9,7 @@ import { Component, linkedSignal, model } from '@angular/core';
 export class StarRatingComponent {
   rating = model.required<number>();
   auxRating = linkedSignal(() => this.rating());
+  readonly maxRating = 5;
 
 
 }

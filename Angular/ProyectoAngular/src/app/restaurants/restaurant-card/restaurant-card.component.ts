@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, input, output } from '@angular/core';
+import { Component, DestroyRef, inject, Input, input, output } from '@angular/core';
 import { Restaurant } from '../interfaces/restaurant';
 import { RestaurantsService } from '../services/restaurants.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,10 +6,11 @@ import { RouterLink } from '@angular/router';
 import { User } from '../interfaces/user';
 import { ConfirmModalComponent } from '../../shared/modals/confirm-modal/confirm-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { StarRatingComponent } from '../../shared/star-rating/star-rating.component';
 
 @Component({
   selector: 'restaurant-card',
-  imports: [RouterLink],
+  imports: [RouterLink, StarRatingComponent],
   templateUrl: './restaurant-card.component.html',
   styleUrl: './restaurant-card.component.css',
 })
@@ -17,6 +18,16 @@ export class RestaurantCardComponent {
   #restaurantsService = inject(RestaurantsService);
   #destroyRef = inject(DestroyRef);
   #modalRef = inject(NgbModal);
+
+  getDistance(restaurant: Restaurant) {
+    const distance = restaurant.distance
+    return distance!.toFixed(2);
+  }
+
+  getStars(restaurant: Restaurant) {
+    const stars = restaurant.stars;
+    return stars!.toFixed(1);
+  }
 
   weekDay: number = new Date().getDay();
   readonly days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
@@ -48,5 +59,10 @@ export class RestaurantCardComponent {
   
   getCreatorName(creator: User) {
     return creator.name;
+  }
+
+  changeRating(rating: number) {
+    const oldRating = this.restaurant().stars;
+    this.restaurant().stars = rating;
   }
 }
